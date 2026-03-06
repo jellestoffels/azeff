@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Azeff | Abstract Art Experience</title>
+    <style>
+        :root {
+            --bg: #000000;
+            --fg: #eeeeee;
+            --dim: #0a0a0a;
+            --line: #111111;
+            --ghost: #141414;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg);
+            color: var(--fg);
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Extreme Gritty Noise */
+        .noise {
+            position: fixed;
+            top: -50%; left: -50%; right: -50%; bottom: -50%;
+            width: 200vw; height: 200vh;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.8;
+            mix-blend-mode: overlay;
+            background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="1.5" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+            animation: grain 0.2s steps(2) infinite;
+        }
+
+        @keyframes grain {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-5%, -10%); }
+            30% { transform: translate(3%, -15%); }
+            50% { transform: translate(12%, 9%); }
+            70% { transform: translate(9%, 4%); }
+            90% { transform: translate(-1%, 7%); }
+        }
+
+        /* Logo */
+        header {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+            mix-blend-mode: difference;
+        }
+
+        header img {
+            width: 50px;
+            height: auto;
+            filter: contrast(200%) grayscale(100%);
+        }
+
+        /* --- THE VOID (Abstract Canvas) --- */
+        .void-space {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg);
+            overflow: hidden;
+            z-index: 1;
+            transition: background-color 0.1s;
+        }
+
+        /* Abstract Elements */
+        .monolith {
+            position: absolute;
+            width: 2px;
+            height: 0vh;
+            background: var(--fg);
+            box-shadow: 0 0 20px var(--fg);
+            transition: height 0.1s ease-out, transform 0.1s ease-out;
+            z-index: 5;
+        }
+
+        .shard-container {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100vw; height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .shard {
+            position: absolute;
+            background: var(--fg);
+            opacity: 0;
+            transform-origin: center;
+            mix-blend-mode: difference;
+            transition: opacity 0.2s, transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
+        }
+
+        .halo {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 300px; height: 300px;
+            border: 1px solid rgba(238, 238, 238, 0.1);
+            border-radius: 50%;
+            box-shadow: inset 0 0 50px rgba(238, 238, 238, 0.05);
+            transition: all 0.2s ease-out;
+            z-index: 2;
+        }
+
+        .strobe-flash {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--fg);
+            opacity: 0;
+            z-index: 10;
+            pointer-events: none;
+            mix-blend-mode: exclusion;
+        }
+
+        /* --- BRUTALIST DESK --- */
+        .control-plane {
+            height: 35vh;
+            background: var(--dim);
+            border-top: 1px solid var(--line);
+            display: flex;
+            padding: 2rem;
+            position: relative;
+            z-index: 100;
+        }
+
+        .desk-grid {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            gap: 2rem;
+        }
+
+        /* Subdued Matrix */
+        .matrix-section {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+            grid-auto-rows: 40px;
+            gap: 4px;
+            align-content: end;
+        }
+
+        .btn {
+            background: var(--bg);
+            border: 1px solid var(--line);
+            color: #222; /* Heavily subdued */
+            font-size: 0.5rem;
+            font-family: monospace;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        /* Functional Buttons */
+        .btn.active {
+            color: var(--fg);
+            border: 1px solid #333;
+            background: #0d0d0d;
+            cursor: pointer;
+            letter-spacing: 1px;
+            font-weight: bold;
+            box-shadow: inset 0 0 0 1px #000;
+        }
+
+        .btn.active::before {
+            content: '';
+            position: absolute;
+            width: 4px; height: 4px;
+            background: var(--fg);
+            top: 4px; left: 4px;
+            border-radius: 50%;
+            box-shadow: 0 0 5px var(--fg);
+            opacity: 0.5;
+        }
+
+        .btn.active:hover {
+            background: #1a1a1a;
+            border-color: #555;
+        }
+        
+        .btn.active:active {
+            background: var(--fg);
+            color: var(--bg);
+        }
+
+        /* Abstract Fader */
+        .fader-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            width: 80px;
+        }
+
+        .fader-label {
+            font-size: 0.5rem;
+            font-family: monospace;
+            color: #555;
+            letter-spacing: 3px;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            transform: rotate(-90deg) translateX(20px);
+            transform-origin: left bottom;
+            white-space: nowrap;
+        }
+
+        .fader-assembly {
+            position: relative;
+            height: 100%;
+            width: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .fader-track {
+            position: absolute;
+            top: 0; bottom: 0; width: 2px;
+            background: var(--line);
+            z-index: 1;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: slider-vertical;
+            appearance: slider-vertical;
+            width: 100%; height: 100%;
+            background: transparent; outline: none; z-index: 2; margin: 0;
+            cursor: ns-resize;
+        }
+
+        /* Brutalist Fader Cap */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px; width: 40px;
+            background: var(--fg);
+            border-radius: 0;
+            border: none;
+            box-shadow: 0 0 10px rgba(255,255,255,0.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            height: 20px; width: 40px;
+            background: var(--fg);
+            border-radius: 0;
+            border: none;
+        }
+
+        @media (max-width: 768px) {
+            .control-plane { height: 30vh; padding: 1rem; }
+            .desk-grid { gap: 1rem; }
+            .matrix-section { grid-template-columns: repeat(4, 1fr); gap: 2px; }
+            .fader-label { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="noise"></div>
+    <header><img src="AZEFF_Icon-White.png" alt="AZEFF Logo"></header>
+
+    <div class="void-space" id="voidSpace">
+        <div class="strobe-flash" id="strobe"></div>
+        <div class="halo" id="halo1"></div>
+        <div class="halo" id="halo2"></div>
+        <div class="monolith" id="monolith"></div>
+        <div class="shard-container" id="shardField"></div>
+    </div>
+
+    <div class="control-plane">
+        <div class="desk-grid">
+            
+            <div class="matrix-section" id="btn-matrix">
+                </div>
+            
+            <div class="fader-section">
+                <div class="fader-label">MAGNITUDE</div>
+                <div class="fader-assembly">
+                    <div class="fader-track"></div>
+                    <input type="range" id="sizeFader" min="0" max="100" value="0">
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const fader = document.getElementById('sizeFader');
+        const monolith = document.getElementById('monolith');
+        const shardField = document.getElementById('shardField');
+        const halo1 = document.getElementById('halo1');
+        const halo2 = document.getElementById('halo2');
+        const strobe = document.getElementById('strobe');
+        const matrix = document.getElementById('btn-matrix');
+
+        const NUM_SHARDS = 40;
+        const NUM_DUMMYS = 28;
+        const SHARDS = [];
+
+        function initDesk() {
+            const activeActions = [
+                { text: "LOG IN", act: () => alert("AUTH_REQ") },
+                { text: "INFO", act: () => alert("DATA_STREAM") },
+                { text: "CONTACT", act: () => alert("UPLINK") }
+            ];
+            let activePlaced = 0;
+
+            for(let i = 0; i < NUM_DUMMYS; i++) {
+                const btn = document.createElement('div');
+                btn.className = 'btn';
+                
+                // Place active buttons sparingly in the layout
+                if (i >= NUM_DUMMYS - 12 && activePlaced < 3 && Math.random() > 0.4) {
+                    btn.classList.add('active');
+                    btn.innerText = activeActions[activePlaced].text;
+                    btn.onclick = activeActions[activePlaced].act;
+                    activePlaced++;
+                } else {
+                    // Random cryptic characters for ghost buttons
+                    const chars = ["", "", "-", ".", "+", "x", "||", "::"];
+                    btn.innerText = chars[Math.floor(Math.random() * chars.length)];
+                }
+                matrix.appendChild(btn);
+            }
+            
+            while(activePlaced < 3) {
+                const btn = document.createElement('div');
+                btn.className = 'btn active';
+                btn.innerText = activeActions[activePlaced].text;
+                btn.onclick = activeActions[activePlaced].act;
+                matrix.appendChild(btn);
+                activePlaced++;
+            }
+        }
+
+        function initArt() {
+            for (let i = 0; i < NUM_SHARDS; i++) {
+                const shard = document.createElement('div');
+                shard.className = 'shard';
+                
+                // Randomize geometric properties
+                const isLine = Math.random() > 0.5;
+                const w = isLine ? (Math.random() * 2 + 1) : (Math.random() * 100 + 10);
+                const h = isLine ? (Math.random() * 200 + 50) : (Math.random() * 100 + 10);
+                
+                shard.style.width = `${w}px`;
+                shard.style.height = `${h}px`;
+                
+                // Base transform data
+                const angle = Math.random() * 360;
+                const dist = Math.random() * 40 + 10; // % distance from center
+                
+                shard.dataset.angle = angle;
+                shard.dataset.dist = dist;
+                shard.dataset.rot = Math.random() * 360;
+                
+                shardField.appendChild(shard);
+                SHARDS.push(shard);
+            }
+        }
+
+        function updateArtPhysics() {
+            const val = parseInt(fader.value);
+            const norm = val / 100;
+
+            // 1. The Monolith (Central vertical tear)
+            monolith.style.height = `${norm * 100}vh`;
+            const thickness = val === 100 ? 100 : (1 + norm * 8);
+            monolith.style.width = `${thickness}px`;
+
+            // 2. Halos (Abstract spatial distortion)
+            halo1.style.transform = `translate(-50%, -50%) scale(${norm * 2}) rotate(${norm * 90}deg)`;
+            halo1.style.opacity = norm > 0.1 ? 1 - norm : 0;
+            halo2.style.transform = `translate(-50%, -50%) scale(${norm * 3}) rotate(${-norm * 45}deg)`;
+            halo2.style.opacity = norm > 0.3 ? (1 - norm) * 0.5 : 0;
+
+            // 3. Shards (Explosive fragmentation)
+            const activeThreshold = Math.floor(norm * NUM_SHARDS);
+            SHARDS.forEach((shard, i) => {
+                if (i < activeThreshold) {
+                    shard.style.opacity = (Math.random() * 0.5 + 0.1) * norm;
+                    const expand = parseFloat(shard.dataset.dist) + (norm * 30);
+                    const tx = Math.cos(shard.dataset.angle) * expand;
+                    const ty = Math.sin(shard.dataset.angle) * expand;
+                    const r = parseFloat(shard.dataset.rot) + (norm * 180);
+                    shard.style.transform = `translate(${tx}vw, ${ty}vh) rotate(${r}deg) scale(${norm * 1.5 + 0.5})`;
+                } else {
+                    shard.style.opacity = 0;
+                    shard.style.transform = `translate(0,0) scale(0)`;
+                }
+            });
+
+            // 4. Pure Chaos / Strobe (Extreme values)
+            if (norm > 0.85) {
+                const flicker = Math.random() > 0.5 ? (norm - 0.8) * 5 : 0;
+                strobe.style.opacity = flicker;
+                document.getElementById('voidSpace').style.backgroundColor = Math.random() > 0.8 ? '#111' : '#000';
+            } else {
+                strobe.style.opacity = 0;
+                document.getElementById('voidSpace').style.backgroundColor = '#000';
+            }
+        }
+
+        // Init
+        initDesk();
+        initArt();
+        
+        // Listeners
+        fader.addEventListener('input', updateArtPhysics);
+        updateArtPhysics();
+
+        // Mobile touch physics
+        let touchStartY = 0;
+        const voidArea = document.getElementById('voidSpace');
+        
+        voidArea.addEventListener('touchstart', e => {
+            touchStartY = e.touches[0].clientY;
+        }, {passive: true});
+
+        voidArea.addEventListener('touchmove', e => {
+            let touchEndY = e.touches[0].clientY;
+            let diff = touchStartY - touchEndY;
+            
+            if (Math.abs(diff) > 5) {
+                let newVal = parseInt(fader.value) + (diff * 0.4);
+                newVal = Math.max(0, Math.min(100, newVal));
+                fader.value = newVal;
+                updateArtPhysics();
+                touchStartY = touchEndY; 
+            }
+        }, {passive: true});
+        
+    </script>
+</body>
+</html>

@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Azeff | Interactive Stage Experience</title>
+    <style>
+        :root {
+            --bg: #020202;
+            --ma-dark: #0a0a0a;
+            --ma-panel: #141414;
+            --ma-btn-off: #1a1a1a;
+            --ma-btn-on: #2a2a2a;
+            --ma-highlight: #c8c8c8;
+            --ma-led: #e6c822; /* MA yellow-ish indicator */
+            --fog: rgba(20, 20, 25, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg);
+            color: #fff;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Intense Gritty Noise Overlay */
+        .noise {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.25;
+            mix-blend-mode: overlay;
+            background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+        }
+
+        /* Vignette to make it dark and moody */
+        .vignette {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 9998;
+            background: radial-gradient(circle at center, transparent 30%, #000 100%);
+        }
+
+        header {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            z-index: 100;
+        }
+
+        header img {
+            width: 70px;
+            height: auto;
+            opacity: 0.8;
+            filter: drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.2));
+        }
+
+        /* --- STAGE VIEW --- */
+        .stage-view {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1200px;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 60%, var(--fog) 0%, var(--bg) 80%);
+            box-shadow: inset 0 -50px 100px #000;
+        }
+
+        .stage-system {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+        }
+
+        /* Line Arrays */
+        .line-array-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            margin: 0 8vw;
+            transform: translateY(-15%);
+            z-index: 10;
+            filter: drop-shadow(0 20px 30px #000);
+        }
+
+        .speaker-box {
+            width: 50px;
+            height: 18px;
+            background: #080808;
+            border: 1px solid #111;
+            border-bottom: 2px solid #000;
+            border-radius: 2px;
+            position: relative;
+            opacity: 0;
+            transform: scale(0.9) translateY(-10px);
+            transition: all 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
+        }
+
+        .speaker-box::after {
+            content: '';
+            position: absolute;
+            top: 2px; left: 2px; right: 2px; bottom: 2px;
+            background: repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.05) 2px, rgba(255,255,255,0.05) 4px);
+        }
+
+        /* Trusses & Fixtures */
+        .truss {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            background: repeating-linear-gradient(45deg, #111, #111 5px, #000 5px, #000 10px);
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            border-top: 1px solid #333;
+            border-bottom: 1px solid #000;
+            box-shadow: 0 10px 30px #000;
+        }
+
+        #truss-top { top: 10%; width: 85%; height: 8px; z-index: 5; }
+        #truss-mid { top: 35%; width: 60%; height: 6px; z-index: 4; }
+        #floor-lights { bottom: 10%; width: 90%; height: 2px; z-index: 3; background: transparent; border: none; box-shadow: none; }
+
+        .fixture {
+            position: relative;
+            background: #050505;
+            border-radius: 2px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Spots (Sharp Beams) */
+        .spot { width: 14px; height: 18px; border-radius: 4px 4px 10px 10px; }
+        .spot .beam {
+            position: absolute;
+            top: 10px; left: 50%;
+            width: 80px; height: 600px;
+            background: linear-gradient(to bottom, rgba(220, 220, 230, 0.25) 0%, transparent 100%);
+            clip-path: polygon(48% 0, 52% 0, 100% 100%, 0% 100%);
+            transform-origin: top center;
+            transform: translateX(-50%);
+            filter: blur(2px);
+            pointer-events: none;
+            mix-blend-mode: screen;
+            animation: panSpot 6s infinite alternate cubic-bezier(0.4, 0, 0.6, 1);
+        }
+
+        /* Washes (Wide Glow) */
+        .wash { width: 20px; height: 14px; border-radius: 50%; box-shadow: 0 0 10px rgba(255,255,255,0.1); }
+        .wash .beam {
+            position: absolute;
+            top: 5px; left: 50%;
+            width: 300px; height: 400px;
+            background: radial-gradient(ellipse at top, rgba(150, 150, 170, 0.15) 0%, transparent 70%);
+            transform-origin: top center;
+            transform: translateX(-50%);
+            pointer-events: none;
+            mix-blend-mode: screen;
+            animation: panWash 8s infinite alternate ease-in-out;
+        }
+
+        /* Strobes (Floor) */
+        .strobe { width: 30px; height: 10px; background: #fff; border-radius: 2px; opacity: 0; box-shadow: 0 0 40px #fff, 0 0 80px #fff; }
+
+        @keyframes panSpot {
+            0% { transform: translateX(-50%) rotate(-35deg); }
+            100% { transform: translateX(-50%) rotate(35deg); }
+        }
+        @keyframes panWash {
+            0% { transform: translateX(-50%) rotate(20deg); }
+            100% { transform: translateX(-50%) rotate(-20deg); }
+        }
+        @keyframes strobeFire {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        /* Abstract Center Object */
+        .center-piece {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px; height: 100px;
+            display: flex; justify-content: center; align-items: center;
+            transition: all 0.3s ease-out;
+            z-index: 8;
+        }
+
+        .core {
+            width: 20px; height: 20px;
+            background: #fff;
+            box-shadow: 0 0 20px #fff, 0 0 50px rgba(255,255,255,0.5);
+            transform: rotate(45deg);
+            transition: all 0.2s;
+        }
+
+        .wireframe {
+            position: absolute;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+        }
+
+        /* --- MA3 DESK VIEW --- */
+        .desk-view {
+            height: 38vh;
+            background: var(--ma-panel);
+            border-top: 2px solid #222;
+            display: flex;
+            padding: 20px;
+            perspective: 1000px;
+            position: relative;
+            box-shadow: inset 0 30px 50px #000, 0 -10px 30px #000;
+            z-index: 100;
+        }
+
+        .desk-panel {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            transform: rotateX(20deg);
+            transform-origin: bottom;
+            background: linear-gradient(to bottom, #111, #080808);
+            border-radius: 8px;
+            border: 1px solid #222;
+            padding: 20px;
+            gap: 30px;
+        }
+
+        /* Button Matrix (Dummy keys + Active keys) */
+        .matrix-section {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            grid-auto-rows: 45px;
+            gap: 8px;
+            align-content: end;
+        }
+
+        .ma-btn {
+            background: linear-gradient(to bottom, var(--ma-btn-off), #0a0a0a);
+            border: 1px solid #000;
+            border-top: 1px solid #333;
+            border-radius: 3px;
+            color: #555;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px #000;
+            position: relative;
+        }
+
+        .ma-btn.active-key {
+            color: var(--ma-highlight);
+            background: linear-gradient(to bottom, var(--ma-btn-on), #111);
+            border-top: 1px solid #555;
+            cursor: pointer;
+            transition: all 0.1s;
+            text-shadow: 0 0 5px rgba(255,255,255,0.3);
+        }
+
+        /* The MA indicator line on active buttons */
+        .ma-btn.active-key::before {
+            content: '';
+            position: absolute;
+            top: 4px; left: 4px;
+            width: 12px; height: 2px;
+            background: var(--ma-led);
+            box-shadow: 0 0 4px var(--ma-led);
+        }
+
+        .ma-btn.active-key:hover {
+            background: linear-gradient(to bottom, #333, #1a1a1a);
+            box-shadow: 0 5px 10px #000, 0 0 10px rgba(255,255,255,0.1);
+        }
+
+        .ma-btn.active-key:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 2px #000;
+        }
+
+        /* Fader Bank Section */
+        .fader-bank {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            padding-left: 20px;
+            border-left: 2px solid #0a0a0a;
+        }
+
+        /* Dummy Faders */
+        .fader-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            opacity: 0.4;
+        }
+
+        .fader-wrap.active {
+            opacity: 1;
+        }
+
+        .fader-label {
+            font-size: 0.6rem;
+            color: #888;
+            letter-spacing: 2px;
+            background: #000;
+            padding: 2px 6px;
+            border-radius: 2px;
+            border: 1px solid #222;
+        }
+
+        .fader-wrap.active .fader-label {
+            color: #fff;
+            border-color: #555;
+            text-shadow: 0 0 5px #fff;
+        }
+
+        /* MA3 Fader Track & LED */
+        .fader-assembly {
+            display: flex;
+            align-items: stretch;
+            gap: 8px;
+            height: 180px;
+            background: #0d0d0d;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #222;
+            box-shadow: inset 0 10px 20px #000, 0 5px 10px #000;
+        }
+
+        .led-meter {
+            width: 4px;
+            background: #000;
+            border-radius: 2px;
+            box-shadow: inset 0 1px 3px #000;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .led-fill {
+            width: 100%;
+            background: var(--ma-led);
+            box-shadow: 0 0 8px var(--ma-led);
+            height: 50%; /* JS controlled */
+            transition: height 0.1s linear;
+        }
+
+        .fader-track {
+            position: relative;
+            width: 30px;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .fader-track::before {
+            content: '';
+            position: absolute;
+            top: 5px; bottom: 5px; width: 6px;
+            background: #000;
+            border-radius: 3px;
+            box-shadow: inset 0 2px 5px #000, 0 0 1px #333;
+            z-index: 1;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: slider-vertical;
+            appearance: slider-vertical;
+            width: 100%; height: 100%;
+            background: transparent; outline: none; z-index: 2; margin: 0;
+            cursor: grab;
+        }
+        
+        input[type="range"]:active { cursor: grabbing; }
+
+        /* MA3 Fader Cap Styling */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 50px; width: 28px;
+            /* MA3 fader: dark metallic with a white center grip line */
+            background: linear-gradient(to bottom, #2a2a2a 0%, #444 45%, #fff 45%, #fff 55%, #444 55%, #1a1a1a 100%);
+            border-radius: 3px;
+            border: 1px solid #000;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.9), 0 -2px 5px rgba(255,255,255,0.1) inset;
+            position: relative;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            height: 50px; width: 28px;
+            background: linear-gradient(to bottom, #2a2a2a 0%, #444 45%, #fff 45%, #fff 55%, #444 55%, #1a1a1a 100%);
+            border-radius: 3px; border: 1px solid #000;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.9), 0 -2px 5px rgba(255,255,255,0.1) inset;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .desk-panel { gap: 15px; padding: 10px; transform: rotateX(10deg); }
+            .matrix-section { grid-template-columns: repeat(4, 1fr); }
+            .hide-mobile { display: none; }
+            .fader-assembly { height: 140px; }
+            .speaker-box { width: 35px; height: 12px; }
+            .truss { width: 95% !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="noise"></div>
+    <div class="vignette"></div>
+
+    <header>
+        <img src="AZEFF_Icon-White.png" alt="AZEFF Logo">
+    </header>
+
+    <div class="stage-view">
+        <div class="stage-system" id="stageSystem">
+            <div class="line-array-container left" id="la-left"></div>
+            
+            <div class="truss" id="truss-top"></div>
+            <div class="truss" id="truss-mid"></div>
+            <div class="truss" id="floor-lights"></div>
+            
+            <div class="center-piece" id="centerPiece">
+                <div class="core" id="core"></div>
+            </div>
+            
+            <div class="line-array-container right" id="la-right"></div>
+        </div>
+    </div>
+
+    <div class="desk-view">
+        <div class="desk-panel">
+            
+            <div class="matrix-section" id="btn-matrix">
+                </div>
+            
+            <div class="fader-bank">
+                <div class="fader-wrap hide-mobile">
+                    <div class="fader-label">EXEC 1</div>
+                    <div class="fader-assembly">
+                        <div class="led-meter"><div class="led-fill" style="height: 0%;"></div></div>
+                        <div class="fader-track"><input type="range" disabled value="0"></div>
+                    </div>
+                </div>
+                <div class="fader-wrap hide-mobile">
+                    <div class="fader-label">EXEC 2</div>
+                    <div class="fader-assembly">
+                        <div class="led-meter"><div class="led-fill" style="height: 0%;"></div></div>
+                        <div class="fader-track"><input type="range" disabled value="0"></div>
+                    </div>
+                </div>
+                <div class="fader-wrap active">
+                    <div class="fader-label">MASTER SIZE</div>
+                    <div class="fader-assembly">
+                        <div class="led-meter"><div class="led-fill" id="size-led" style="height: 50%;"></div></div>
+                        <div class="fader-track">
+                            <input type="range" id="sizeFader" min="0" max="100" value="50">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const fader = document.getElementById('sizeFader');
+        const ledFill = document.getElementById('size-led');
+        const stageSystem = document.getElementById('stageSystem');
+        
+        const laLeft = document.getElementById('la-left');
+        const laRight = document.getElementById('la-right');
+        const trussTop = document.getElementById('truss-top');
+        const trussMid = document.getElementById('truss-mid');
+        const floorLights = document.getElementById('floor-lights');
+        const centerPiece = document.getElementById('centerPiece');
+        const core = document.getElementById('core');
+        const matrix = document.getElementById('btn-matrix');
+
+        const MAX_SPEAKERS = 16;
+        const MAX_SPOTS = 12;
+        const MAX_WASHES = 8;
+        const MAX_STROBES = 10;
+        const DUMMY_BTNS = 24;
+
+        function initDesk() {
+            // Generate matrix of buttons
+            const activeLabels = ["Log In", "Info", "Contact"];
+            let activePlaced = 0;
+
+            for(let i = 0; i < DUMMY_BTNS; i++) {
+                const btn = document.createElement('div');
+                btn.className = 'ma-btn';
+                
+                // Randomly place active buttons in the bottom rows
+                if (i >= DUMMY_BTNS - 8 && activePlaced < 3 && Math.random() > 0.3) {
+                    btn.classList.add('active-key');
+                    btn.innerText = activeLabels[activePlaced];
+                    btn.onclick = () => alert(`Executing macro: ${btn.innerText}`);
+                    activePlaced++;
+                } else {
+                    // Random dummy labels
+                    const labels = ["Clear", "Store", "Update", "Fix", "Select", "Off", "Macro", ""];
+                    btn.innerText = labels[Math.floor(Math.random() * labels.length)];
+                }
+                matrix.appendChild(btn);
+            }
+            
+            // Ensure all 3 are placed if random logic missed them
+            while(activePlaced < 3) {
+                const btn = document.createElement('div');
+                btn.className = 'ma-btn active-key';
+                btn.innerText = activeLabels[activePlaced];
+                btn.onclick = () => alert(`Executing macro: ${btn.innerText}`);
+                matrix.appendChild(btn);
+                activePlaced++;
+            }
+        }
+
+        function initStage() {
+            // Build Line Arrays
+            for (let i = 0; i < MAX_SPEAKERS; i++) {
+                laLeft.appendChild(createDiv('speaker-box'));
+                laRight.appendChild(createDiv('speaker-box'));
+            }
+
+            // Build Spots (Top Truss)
+            for (let i = 0; i < MAX_SPOTS; i++) {
+                const fix = createDiv('fixture spot');
+                const beam = createDiv('beam');
+                if(i % 2 === 0) beam.style.animationDelay = '-3s'; // Break up animation sync
+                fix.appendChild(beam);
+                trussTop.appendChild(fix);
+            }
+
+            // Build Washes (Mid Truss)
+            for (let i = 0; i < MAX_WASHES; i++) {
+                const fix = createDiv('fixture wash');
+                const beam = createDiv('beam');
+                if(i % 2 === 0) beam.style.animationDelay = '-4s';
+                fix.appendChild(beam);
+                trussMid.appendChild(fix);
+            }
+
+            // Build Strobes (Floor)
+            for (let i = 0; i < MAX_STROBES; i++) {
+                const fix = createDiv('strobe');
+                floorLights.appendChild(fix);
+            }
+
+            // Build Center Wireframes
+            for(let i = 0; i < 4; i++) {
+                const wf = createDiv('wireframe');
+                centerPiece.appendChild(wf);
+            }
+        }
+
+        function createDiv(className) {
+            const div = document.createElement('div');
+            div.className = className;
+            return div;
+        }
+
+        function updateStagePhysics() {
+            const val = parseInt(fader.value);
+            const normalized = val / 100;
+
+            // Update MA3 LED meter
+            ledFill.style.height = `${val}%`;
+            if(val > 90) ledFill.style.background = '#ff3333'; // Clip red
+            else ledFill.style.background = 'var(--ma-led)';
+
+            // 1. Stage Scale
+            stageSystem.style.transform = `scale(${0.7 + (normalized * 0.45)})`;
+
+            // 2. Line Arrays (Top down)
+            const activeSpeakers = Math.max(1, Math.floor(normalized * MAX_SPEAKERS));
+            Array.from(laLeft.children).forEach((el, i) => toggleElement(el, i < activeSpeakers, 'scale(1) translateY(0)', 'scale(0.8) translateY(-10px)'));
+            Array.from(laRight.children).forEach((el, i) => toggleElement(el, i < activeSpeakers, 'scale(1) translateY(0)', 'scale(0.8) translateY(-10px)'));
+
+            // 3. Spots (Outwards from center)
+            const activeSpots = Math.floor(normalized * MAX_SPOTS);
+            toggleSymmetric(trussTop.children, activeSpots, MAX_SPOTS);
+
+            // 4. Washes
+            const activeWashes = Math.floor(normalized * MAX_WASHES);
+            toggleSymmetric(trussMid.children, activeWashes, MAX_WASHES);
+
+            // 5. Centerpiece Complexity
+            const baseSize = 50 + (normalized * 150);
+            Array.from(centerPiece.getElementsByClassName('wireframe')).forEach((wf, i) => {
+                const size = baseSize * (1 - (i * 0.2));
+                wf.style.width = `${size}px`;
+                wf.style.height = `${size}px`;
+                wf.style.transform = `rotate(${normalized * 180 * (i+1)}deg) scale(${normalized > 0.1 ? 1 : 0})`;
+            });
+            core.style.boxShadow = `0 0 ${20 + (normalized*50)}px #fff, 0 0 ${50 + (normalized*100)}px rgba(255,255,255,0.5)`;
+            core.style.transform = `rotate(${45 + (normalized * 360)}deg) scale(${0.5 + normalized})`;
+
+            // 6. Strobes (Only fire above 80%)
+            const strobes = floorLights.children;
+            for(let i=0; i < strobes.length; i++) {
+                if(normalized > 0.8) {
+                    strobes[i].style.animation = `strobeFire ${0.05 + (Math.random() * 0.1)}s infinite`;
+                } else {
+                    strobes[i].style.animation = 'none';
+                    strobes[i].style.opacity = '0';
+                }
+            }
+        }
+
+        function toggleSymmetric(collection, activeCount, maxCount) {
+            const centerIdx = maxCount / 2;
+            const threshold = activeCount / 2;
+            for (let i = 0; i < maxCount; i++) {
+                // Determine distance from center (0.5 offset to perfectly split even arrays)
+                const dist = Math.abs(i - centerIdx + 0.5); 
+                collection[i].style.opacity = dist <= threshold ? '1' : '0';
+            }
+        }
+
+        function toggleElement(el, isActive, transformOn, transformOff) {
+            el.style.opacity = isActive ? '1' : '0';
+            el.style.transform = isActive ? transformOn : transformOff;
+        }
+
+        // Setup
+        initDesk();
+        initStage();
+        
+        // Listeners
+        fader.addEventListener('input', updateStagePhysics);
+        updateStagePhysics(); // Initial trigger
+
+        // Mobile touch physics (Swiping anywhere on stage area to control fader)
+        let touchStartY = 0;
+        const stageArea = document.querySelector('.stage-view');
+        
+        stageArea.addEventListener('touchstart', e => {
+            touchStartY = e.touches[0].clientY;
+        }, {passive: true});
+
+        stageArea.addEventListener('touchmove', e => {
+            let touchEndY = e.touches[0].clientY;
+            let diff = touchStartY - touchEndY;
+            
+            if (Math.abs(diff) > 5) {
+                let newVal = parseInt(fader.value) + (dif
+                f * 0.3);
+                newVal = Math.max(0, Math.min(100, newVal));
+                fader.value = newVal;
+                updateStagePhysics();
+                touchStartY = touchEndY; 
+            }
+        }, {passive: true});
+        
+    </script>
+</body>
+</html>

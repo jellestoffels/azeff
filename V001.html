@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Azeff | Interactive Stage Experience</title>
+    <style>
+        :root {
+            --bg: #050505;
+            --fg: #EEEEEE;
+            --gray-1: #111111;
+            --gray-2: #222222;
+            --gray-3: #333333;
+            --fader-val: 0.5;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg);
+            color: var(--fg);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Abstract Grainy Noise Overlay */
+        .noise {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.12;
+            background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+        }
+
+        /* Header / Logo */
+        header {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+
+        header img {
+            width: 60px;
+            height: auto;
+            opacity: 0.9;
+            filter: drop-shadow(0px 0px 5px rgba(238, 238, 238, 0.3));
+        }
+
+        /* Concert Stage View (Top portion) */
+        .stage-view {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #151515 0%, var(--bg) 70%);
+        }
+
+        .stage-system {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+        }
+
+        /* Line Arrays */
+        .line-array-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin: 0 10vw;
+            transform: translateY(-10%);
+        }
+
+        .speaker-box {
+            width: 40px;
+            height: 15px;
+            background: linear-gradient(135deg, var(--gray-3), var(--gray-1));
+            border: 1px solid #444;
+            border-radius: 2px;
+            box-shadow: inset 0 0 5px #000, 0 5px 15px rgba(0,0,0,0.8);
+            transform-origin: center;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            opacity: 0;
+            transform: scale(0.8) translateY(-20px);
+        }
+
+        /* Lighting Fixtures (Truss) */
+        .truss-top {
+            position: absolute;
+            top: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 5px;
+            background: var(--gray-2);
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.9);
+        }
+
+        .fixture {
+            width: 10px;
+            height: 10px;
+            background: var(--gray-3);
+            border-radius: 50%;
+            position: relative;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .beam {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            width: 100px;
+            height: 400px;
+            background: linear-gradient(to bottom, rgba(238, 238, 238, 0.15) 0%, transparent 100%);
+            clip-path: polygon(45% 0, 55% 0, 100% 100%, 0% 100%);
+            transform-origin: top center;
+            transform: translateX(-50%);
+            animation: pan 4s infinite alternate ease-in-out;
+            pointer-events: none;
+        }
+
+        .fixture:nth-child(even) .beam {
+            animation-delay: -2s;
+            background: linear-gradient(to bottom, rgba(200, 200, 200, 0.1) 0%, transparent 100%);
+        }
+
+        @keyframes pan {
+            0% { transform: translateX(-50%) rotate(-15deg); }
+            100% { transform: translateX(-50%) rotate(15deg); }
+        }
+
+        /* Central Abstract Object */
+        .center-piece {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 150px;
+            height: 150px;
+            transform: translate(-50%, -50%);
+            border: 1px solid rgba(238, 238, 238, 0.2);
+            border-radius: 50%;
+            box-shadow: 0 0 40px rgba(238, 238, 238, 0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease-out;
+        }
+
+        .center-piece::before, .center-piece::after {
+            content: '';
+            position: absolute;
+            border: 1px solid rgba(238, 238, 238, 0.4);
+            border-radius: 50%;
+            transition: all 0.2s ease-out;
+        }
+
+        /* MA3 Desk View (Bottom portion) */
+        .desk-view {
+            height: 35vh;
+            background: linear-gradient(to bottom, var(--gray-1) 0%, #000 100%);
+            border-top: 2px solid var(--gray-3);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 2rem 10vw;
+            perspective: 800px;
+            position: relative;
+            box-shadow: inset 0 20px 50px rgba(0,0,0,0.8);
+        }
+
+        /* Angled Desk Panel */
+        .desk-panel {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transform: rotateX(15deg);
+            transform-origin: bottom;
+        }
+
+        /* Buttons Section */
+        .executors {
+            display: flex;
+            gap: 15px;
+        }
+
+        .ma-btn {
+            background: linear-gradient(to bottom, var(--gray-2) 0%, var(--gray-1) 100%);
+            border: 2px solid var(--gray-3);
+            color: var(--fg);
+            padding: 15px 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.1s;
+            text-transform: uppercase;
+        }
+
+        .ma-btn:hover {
+            background: linear-gradient(to bottom, var(--gray-3) 0%, var(--gray-2) 100%);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.6), 0 0 10px rgba(238,238,238,0.2), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .ma-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.8), inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .ma-btn::after {
+            content: '';
+            position: absolute;
+            top: -20px; left: -20px; right: -20px; bottom: -20px;
+            background: radial-gradient(circle, rgba(238,238,238,0.2) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .ma-btn:hover::after { opacity: 1; }
+
+        /* Fader Section */
+        .fader-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            background: var(--gray-1);
+            padding: 20px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--gray-3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .fader-label {
+            font-size: 0.8rem;
+            letter-spacing: 3px;
+            color: #aaa;
+            text-shadow: 0 0 5px rgba(238,238,238,0.3);
+        }
+
+        .fader-track {
+            position: relative;
+            width: 40px;
+            height: 180px;
+            background: #0a0a0a;
+            border-radius: 20px;
+            border: 1px solid var(--gray-3);
+            box-shadow: inset 0 5px 15px rgba(0,0,0,0.9);
+            display: flex;
+            justify-content: center;
+        }
+
+        /* The vertical slit */
+        .fader-track::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            bottom: 10px;
+            width: 4px;
+            background: #000;
+            border-radius: 2px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,1);
+            z-index: 1;
+        }
+
+        /* Scale Marks */
+        .fader-track::after {
+            content: '';
+            position: absolute;
+            left: -15px;
+            top: 10px;
+            bottom: 10px;
+            width: 5px;
+            background: repeating-linear-gradient(
+                to bottom,
+                #555,
+                #555 1px,
+                transparent 1px,
+                transparent 10%
+            );
+        }
+
+        input[type="range"] {
+            -webkit-appearance: slider-vertical;
+            appearance: slider-vertical;
+            writing-mode: bt-lr; /* IE/Edge */
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            outline: none;
+            z-index: 2;
+            margin: 0;
+            cursor: grab;
+        }
+        
+        input[type="range"]:active {
+            cursor: grabbing;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 45px;
+            width: 35px;
+            background: linear-gradient(to right, #ccc, #fff, #ccc);
+            border-radius: 4px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.8), 0 0 15px rgba(238,238,238,0.5);
+            border: 1px solid #fff;
+            position: relative;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            height: 45px;
+            width: 35px;
+            background: linear-gradient(to right, #ccc, #fff, #ccc);
+            border-radius: 4px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.8), 0 0 15px rgba(238,238,238,0.5);
+            border: 1px solid #fff;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .desk-panel {
+                flex-direction: column-reverse;
+                justify-content: center;
+                gap: 20px;
+                transform: rotateX(5deg);
+            }
+            .desk-view {
+                height: 45vh;
+                padding: 1rem;
+            }
+            .fader-track {
+                height: 120px;
+            }
+            .executors {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .ma-btn {
+                padding: 12px 10px;
+                font-size: 0.8rem;
+                flex: 1;
+                margin: 0 5px;
+            }
+            header img { width: 45px; }
+            .line-array-container { margin: 0 2vw; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="noise"></div>
+
+    <header>
+        <img src="AZEFF_Icon-White.png" alt="AZEFF Logo">
+    </header>
+
+    <div class="stage-view">
+        <div class="stage-system" id="stageSystem">
+            <div class="line-array-container left" id="la-left"></div>
+            
+            <div class="truss-top" id="truss-top"></div>
+            
+            <div class="center-piece" id="centerPiece"></div>
+            
+            <div class="line-array-container right" id="la-right"></div>
+        </div>
+    </div>
+
+    <div class="desk-view">
+        <div class="desk-panel">
+            <div class="executors">
+                <button class="ma-btn" onclick="alert('Login sequence initiated...')">Log In</button>
+                <button class="ma-btn" onclick="alert('Accessing Information...')">Info</button>
+                <button class="ma-btn" onclick="alert('Opening Comms Channel...')">Contact</button>
+            </div>
+            
+            <div class="fader-section">
+                <div class="fader-label">SIZE</div>
+                <div class="fader-track">
+                    <input type="range" id="sizeFader" min="0" max="100" value="50">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fader = document.getElementById('sizeFader');
+        const laLeft = document.getElementById('la-left');
+        const laRight = document.getElementById('la-right');
+        const trussTop = document.getElementById('truss-top');
+        const centerPiece = document.getElementById('centerPiece');
+        const stageSystem = document.getElementById('stageSystem');
+
+        const MAX_SPEAKERS = 14;
+        const MAX_LIGHTS = 20;
+
+        // Initialize DOM Elements
+        function initStage() {
+            // Build Line Arrays
+            for (let i = 0; i < MAX_SPEAKERS; i++) {
+                const spkL = document.createElement('div');
+                spkL.className = 'speaker-box';
+                laLeft.appendChild(spkL);
+
+                const spkR = document.createElement('div');
+                spkR.className = 'speaker-box';
+                laRight.appendChild(spkR);
+            }
+
+            // Build Top Lights
+            for (let i = 0; i < MAX_LIGHTS; i++) {
+                const light = document.createElement('div');
+                light.className = 'fixture';
+                
+                const beam = document.createElement('div');
+                beam.className = 'beam';
+                light.appendChild(beam);
+                
+                trussTop.appendChild(light);
+            }
+        }
+
+        // Update elements based on fader (0 to 100)
+        function updateStagePhysics() {
+            const val = parseInt(fader.value);
+            const normalized = val / 100; // 0.0 to 1.0
+
+            // 1. Scale the entire stage slightly to simulate "Size"
+            const stageScale = 0.7 + (normalized * 0.4); 
+            stageSystem.style.transform = `scale(${stageScale})`;
+
+            // 2. Center piece abstraction complexity
+            const ringSize1 = 150 + (normalized * 100);
+            const ringSize2 = 100 + (normalized * 150);
+            centerPiece.style.width = `${ringSize1}px`;
+            centerPiece.style.height = `${ringSize1}px`;
+            centerPiece.style.boxShadow = `0 0 ${40 + (normalized * 60)}px rgba(238, 238, 238, ${0.05 + (normalized * 0.15)})`;
+            
+            // 3. Update Speakers (reveal from top down)
+            const activeSpeakers = Math.max(1, Math.floor(normalized * MAX_SPEAKERS));
+            const speakersL = laLeft.children;
+            const speakersR = laRight.children;
+
+            for (let i = 0; i < MAX_SPEAKERS; i++) {
+                if (i < activeSpeakers) {
+                    speakersL[i].style.opacity = '1';
+                    speakersL[i].style.transform = 'scale(1) translateY(0)';
+                    speakersR[i].style.opacity = '1';
+                    speakersR[i].style.transform = 'scale(1) translateY(0)';
+                } else {
+                    speakersL[i].style.opacity = '0';
+                    speakersL[i].style.transform = 'scale(0.8) translateY(-20px)';
+                    speakersR[i].style.opacity = '0';
+                    speakersR[i].style.transform = 'scale(0.8) translateY(-20px)';
+                }
+            }
+
+            // 4. Update Lights (reveal outwards from center)
+            const activeLights = Math.max(2, Math.floor(normalized * MAX_LIGHTS));
+            const lights = trussTop.children;
+            const centerIdx = Math.floor(MAX_LIGHTS / 2);
+
+            for (let i = 0; i < MAX_LIGHTS; i++) {
+                // Calculate distance from center to symmetrically turn on lights
+                const dist = Math.abs(i - centerIdx);
+                const threshold = activeLights / 2;
+
+                if (dist < threshold) {
+                    lights[i].style.opacity = '1';
+                } else {
+                    lights[i].style.opacity = '0';
+                }
+            }
+        }
+
+        // Event Listeners
+        fader.addEventListener('input', updateStagePhysics);
+        
+        // Boot sequence
+        initStage();
+        updateStagePhysics();
+
+        // Optional: Swipe support on mobile to adjust fader
+        let touchStartY = 0;
+        document.querySelector('.stage-view').addEventListener('touchstart', e => {
+            touchStartY = e.touches[0].clientY;
+        }, {passive: true});
+
+        document.querySelector('.stage-view').addEventListener('touchmove', e => {
+            let touchEndY = e.touches[0].clientY;
+            let diff = touchStartY - touchEndY;
+            
+            if (Math.abs(diff) > 10) {
+                let newVal = parseInt(fader.value) + (diff * 0.2);
+                newVal = Math.max(0, Math.min(100, newVal));
+                fader.value = newVal;
+                updateStagePhysics();
+                touchStartY = touchEndY; // Reset for continuous smooth swipe
+            }
+        }, {passive: true});
+        
+    </script>
+</body>
+</html>
