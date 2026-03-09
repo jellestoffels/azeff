@@ -8,7 +8,6 @@
         :root {
             --bg: #000000;
             --fg: #e0e0e0;
-            --shape-color: #e0e0e0;
             --panel: rgba(8, 8, 8, 0.85);
             --panel-border: #1a1a1a;
             --pad-off: #0a0a0a;
@@ -16,8 +15,6 @@
             --pad-border: #111111;
             --fader-track: #040404;
             --fader-thumb: #d4d4d4;
-            --pastel-1: transparent;
-            --pastel-2: transparent;
         }
 
         * {
@@ -37,19 +34,6 @@
             font-family: 'Helvetica Neue', Arial, sans-serif;
             overflow: hidden;
             touch-action: none;
-        }
-
-        /* Pastel Ambient Background */
-        .ambient-bg {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: 
-                radial-gradient(circle at 20% 20%, var(--pastel-1) 0%, transparent 60%),
-                radial-gradient(circle at 80% 80%, var(--pastel-2) 0%, transparent 60%);
-            mix-blend-mode: screen;
-            z-index: 0;
-            transition: background 1.5s ease-in-out;
-            pointer-events: none;
         }
 
         /* Extreme Grain Overlay */
@@ -74,6 +58,7 @@
             90% { transform: translate(-1%, 7%); }
         }
 
+        /* Increased Logo Size */
         header {
             position: absolute;
             top: 2rem;
@@ -123,32 +108,32 @@
         .ch-h, .ch-v, .oval-main, .arc-inner, .core-dot {
             position: absolute;
             background: transparent;
-            mix-blend-mode: screen;
-            transition: all 0.1s ease-out, background-color 1.5s ease, border-color 1.5s ease, box-shadow 1.5s ease;
+            mix-blend-mode: difference;
+            transition: all 0.1s ease-out;
             pointer-events: none;
         }
 
         .ch-h {
-            background: var(--shape-color);
+            background: var(--fg);
             height: 2px; width: 0;
-            box-shadow: 0 0 20px var(--shape-color);
+            box-shadow: 0 0 20px var(--fg);
         }
 
         .ch-v {
-            background: var(--shape-color);
+            background: var(--fg);
             width: 2px; height: 0;
-            box-shadow: 0 0 20px var(--shape-color);
+            box-shadow: 0 0 20px var(--fg);
         }
 
         .oval-main {
-            border: 2px solid var(--shape-color);
+            border: 2px solid var(--fg);
             border-radius: 50%;
             box-shadow: inset 0 0 40px rgba(255,255,255,0.05), 0 0 40px rgba(255,255,255,0.05);
             opacity: 0;
         }
 
         .arc-inner {
-            border: 2px solid var(--shape-color);
+            border: 2px solid var(--fg);
             border-radius: 50%;
             border-top: none; 
             border-bottom: none;
@@ -156,9 +141,9 @@
         }
 
         .core-dot {
-            background: var(--shape-color);
+            background: var(--fg);
             border-radius: 50%;
-            box-shadow: 0 0 50px var(--shape-color);
+            box-shadow: 0 0 50px var(--fg);
             opacity: 0;
         }
 
@@ -173,11 +158,11 @@
 
         .shard {
             position: absolute;
-            background: var(--shape-color);
+            background: var(--fg);
             opacity: 0;
             transform-origin: center;
-            mix-blend-mode: screen;
-            transition: opacity 0.2s, transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1), background-color 1.5s ease;
+            mix-blend-mode: difference;
+            transition: opacity 0.2s, transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
         }
 
         /* --- FLOATING CONTROL PANEL --- */
@@ -194,31 +179,28 @@
             padding: 20px;
             border-radius: 6px;
             display: flex;
-            align-items: stretch;
             gap: 20px;
             box-shadow: 0 30px 60px rgba(0,0,0,0.9), inset 0 1px 1px rgba(255,255,255,0.05);
             width: 90vw;
-            max-width: 500px;
+            max-width: 450px;
         }
 
-        /* Matrix - Reduced to 2 rows */
         .matrix {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(2, 1fr);
             gap: clamp(4px, 1.5vw, 8px);
+            align-content: center;
             flex: 1;
         }
 
         .pad {
             width: 100%; 
-            height: 100%;
-            min-height: 45px;
+            aspect-ratio: 1;
             background: var(--pad-off);
             border: 1px solid var(--pad-border);
             border-radius: 4px;
             color: #222;
-            font-size: clamp(8px, 2vw, 11px);
+            font-size: clamp(8px, 2.5vw, 11px);
             font-weight: bold;
             font-family: monospace;
             text-transform: uppercase;
@@ -234,8 +216,6 @@
             border-color: #333;
             cursor: pointer;
             box-shadow: inset 0 2px 5px rgba(0,0,0,0.8), 0 0 5px rgba(255,255,255,0.02);
-            text-align: center;
-            line-height: 1.2;
         }
 
         .pad.active:hover {
@@ -245,12 +225,12 @@
         }
 
         .pad.active:active {
-            background: var(--shape-color);
+            background: var(--fg);
             color: var(--bg);
-            box-shadow: 0 0 15px var(--shape-color);
+            box-shadow: 0 0 15px var(--fg);
         }
 
-        /* Thick Custom Fader filling full panel height */
+        /* Thick Custom Fader */
         .fader-module {
             width: 80px;
             background: #050505;
@@ -266,13 +246,16 @@
         input[type="range"] {
             -webkit-appearance: none;
             appearance: none;
-            /* Width acts as height due to rotation. Updated dynamically via JS to match container */
-            width: 100px; 
+            width: 180px; 
             height: 70px; 
             background: transparent;
             transform: rotate(-90deg);
             outline: none !important;
             margin: 0;
+        }
+
+        input[type="range"]:focus, input[type="range"]:active {
+            outline: none !important;
         }
 
         /* Extra Thick Track */
@@ -296,14 +279,14 @@
         /* Chunky Brutalist Thumb */
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 44px; width: 36px; 
+            height: 44px; 
+            width: 36px; 
             background: var(--fader-thumb);
             border: 3px solid #000;
             border-radius: 3px;
             margin-top: -14px; 
             box-shadow: 0 6px 12px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,0.8);
             cursor: ns-resize;
-            transition: box-shadow 0.2s;
         }
 
         input[type="range"]::-moz-range-thumb {
@@ -313,34 +296,22 @@
             border-radius: 3px;
             box-shadow: 0 6px 12px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,0.8);
             cursor: ns-resize;
-            transition: box-shadow 0.2s;
         }
 
-        /* Glow Affordance Animation */
-        .glow-active::-webkit-slider-thumb {
-            animation: faderPulse 1.5s infinite alternate;
-        }
-        .glow-active::-moz-range-thumb {
-            animation: faderPulse 1.5s infinite alternate;
-        }
-
-        @keyframes faderPulse {
-            0% { box-shadow: 0 6px 12px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,0.8), 0 0 5px rgba(255,255,255,0.2); }
-            100% { box-shadow: 0 6px 12px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,1), 0 0 25px rgba(255,255,255,0.8); }
-        }
-
+        /* Mobile Adjustments */
         @media (max-width: 600px) {
             .device-panel {
-                bottom: 25px; padding: 12px; gap: 12px;
+                bottom: 25px;
+                padding: 12px;
+                gap: 12px;
             }
-            .fader-module { width: 60px; }
-            .pad { font-size: 9px; }
+            .fader-module { width: 70px; }
+            input[type="range"] { width: 160px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="ambient-bg"></div>
     <div class="noise"></div>
     <header><img src="AZEFF_Icon-White.png" alt="AZEFF Logo"></header>
 
@@ -362,14 +333,13 @@
         <div class="matrix" id="pad-matrix">
             </div>
         
-        <div class="fader-module" id="faderContainer">
-            <input type="range" id="sizeFader" class="glow-active" min="0" max="100" value="0">
+        <div class="fader-module">
+            <input type="range" id="sizeFader" min="0" max="100" value="0">
         </div>
     </div>
 
     <script>
         const fader = document.getElementById('sizeFader');
-        const faderContainer = document.getElementById('faderContainer');
         const artRig = document.getElementById('artRig');
         const chH = document.getElementById('chH');
         const chV = document.getElementById('chV');
@@ -380,87 +350,50 @@
         const shardField = document.getElementById('shardField');
         const strobe = document.getElementById('strobe');
         const matrix = document.getElementById('pad-matrix');
-        const rootStyles = document.documentElement.style;
 
         const NUM_SHARDS = 45;
         const SHARDS = [];
 
-        // Dynamic State for Shuffle
-        let artState = {
-            stretchX: 1,
-            stretchY: 1,
-            rotSpeed: 1,
-            shardBiasX: 1,
-            shardBiasY: 1,
-            colorHue: 0,
-            hasColor: false
-        };
-
-        // Size Fader to fill vertical space exactly
-        function resizeFader() {
-            // Fader length = Container Height - Borders/Padding offset
-            const containerHeight = faderContainer.clientHeight;
-            fader.style.width = `${containerHeight - 10}px`; 
-        }
-
-        window.addEventListener('resize', resizeFader);
-
-        function triggerShuffle() {
-            artState.hasColor = true;
-            artState.colorHue = Math.floor(Math.random() * 360);
-            
-            // Randomize geometric modifiers
-            artState.stretchX = Math.random() * 1.5 + 0.5;
-            artState.stretchY = Math.random() * 1.5 + 0.5;
-            artState.rotSpeed = (Math.random() - 0.5) * 4; // Can reverse direction
-            artState.shardBiasX = (Math.random() - 0.5) * 2;
-            artState.shardBiasY = (Math.random() - 0.5) * 2;
-
-            // Apply subtle pastel background gradients
-            const hue1 = artState.colorHue;
-            const hue2 = (hue1 + 180 + (Math.random()*60 - 30)) % 360; // Complementary analog
-            
-            rootStyles.setProperty('--pastel-1', `hsla(${hue1}, 50%, 60%, 0.15)`);
-            rootStyles.setProperty('--pastel-2', `hsla(${hue2}, 50%, 60%, 0.15)`);
-            
-            // Tint shapes slightly towards the hue
-            rootStyles.setProperty('--shape-color', `hsl(${hue1}, 40%, 85%)`);
-
-            updateArtPhysics();
-        }
-
         function initDevice() {
-            const NUM_PADS = 8; // Exactly 2 rows of 4
+            const NUM_PADS = 16; 
             
-            const bottomRowActions = [
-                { text: "SHUFFLE", act: triggerShuffle },
+            const activeActions = [
                 { text: "LOG IN", act: () => alert("AUTH_SEQ_INIT") },
                 { text: "INFO", act: () => alert("SYS_DATA_READ") },
                 { text: "CONTACT", act: () => alert("UPLINK_ESTAB") }
             ];
+            
+            let activePlaced = 0;
 
             for(let i = 0; i < NUM_PADS; i++) {
                 const pad = document.createElement('div');
                 pad.className = 'pad';
                 
-                // Top Row (Indices 0-3) = Ghost symbols
-                if (i < 4) {
-                    const symbols = ["+", "-", "·", "::", "||", "x", ""];
-                    pad.innerText = symbols[Math.floor(Math.random() * symbols.length)];
-                } 
-                // Bottom Row (Indices 4-7) = Functional Actions beside each other
-                else {
-                    const action = bottomRowActions[i - 4];
+                // Randomly assign the 3 functional keys towards the bottom
+                if (i >= NUM_PADS - 6 && activePlaced < 3 && Math.random() > 0.3) {
                     pad.classList.add('active');
-                    pad.innerText = action.text;
-                    
+                    pad.innerText = activeActions[activePlaced].text;
                     pad.addEventListener('touchstart', (e) => {
                         e.preventDefault(); 
-                        action.act();
+                        activeActions[activePlaced].act();
                     });
-                    pad.onclick = action.act;
+                    pad.onclick = activeActions[activePlaced].act;
+                    activePlaced++;
+                } else {
+                    const symbols = ["+", "-", "·", "::", "||", "x", ""];
+                    pad.innerText = symbols[Math.floor(Math.random() * symbols.length)];
                 }
                 matrix.appendChild(pad);
+            }
+            
+            while(activePlaced < 3) {
+                const pad = document.createElement('div');
+                pad.className = 'pad active';
+                pad.innerText = activeActions[activePlaced].text;
+                pad.onclick = activeActions[activePlaced].act;
+                pad.addEventListener('touchstart', (e) => { e.preventDefault(); activeActions[activePlaced].act(); });
+                matrix.appendChild(pad);
+                activePlaced++;
             }
         }
 
@@ -489,55 +422,47 @@
             const val = parseInt(fader.value);
             const norm = val / 100;
 
-            // Apply randomized stretching logic
-            const sX = artState.stretchX;
-            const sY = artState.stretchY;
-
             // 1. Crosshairs expanding
-            chV.style.height = `${norm * 150 * sY}vh`;
-            chH.style.width = `${norm * 150 * sX}vw`;
+            chV.style.height = `${norm * 150}vh`;
+            chH.style.width = `${norm * 150}vw`;
             const thickness = val === 100 ? 12 : (2 + norm * 5);
             chV.style.width = `${thickness}px`;
             chH.style.height = `${thickness}px`;
 
-            // 2. Logo Main Oval shaping (modified by shuffle stretch)
-            ovalMain.style.width = `${norm * 85 * sX}vw`;
-            ovalMain.style.height = `${norm * 35 * sY}vw`;
+            // 2. Logo Main Oval shaping
+            ovalMain.style.width = `${norm * 85}vw`;
+            ovalMain.style.height = `${norm * 35}vw`;
             ovalMain.style.opacity = norm > 0.05 ? Math.min(1, norm * 2.5) : 0;
             
             // 3. Inner Arcs
-            arcInner.style.width = `${norm * 50 * sX}vw`;
-            arcInner.style.height = `${norm * 35 * sY}vw`;
+            arcInner.style.width = `${norm * 50}vw`;
+            arcInner.style.height = `${norm * 35}vw`;
             arcInner.style.opacity = norm > 0.1 ? Math.min(1, (norm - 0.1) * 3) : 0;
 
             // 4. Central Core Pupil
             const coreSize = (norm * 12) + (norm > 0.85 ? Math.random() * 4 : 0);
-            coreDot.style.width = `${coreSize * ((sX+sY)/2)}vw`;
-            coreDot.style.height = `${coreSize * ((sX+sY)/2)}vw`;
+            coreDot.style.width = `${coreSize}vw`;
+            coreDot.style.height = `${coreSize}vw`;
             coreDot.style.opacity = norm > 0.15 ? 1 : 0;
 
-            // 5. Rig Distortion
-            if (norm > 0.5) {
-                const rot = (norm - 0.5) * 45 * artState.rotSpeed; 
-                const jitterX = (Math.random() - 0.5) * (norm - 0.5) * 20;
-                const jitterY = (Math.random() - 0.5) * (norm - 0.5) * 20;
+            // 5. Rig Distortion at high fader values
+            if (norm > 0.6) {
+                const rot = (norm - 0.6) * 30; 
+                const jitterX = (Math.random() - 0.5) * (norm - 0.6) * 15;
+                const jitterY = (Math.random() - 0.5) * (norm - 0.6) * 15;
                 artRig.style.transform = `translate(calc(-50% + ${jitterX}px), calc(-50% + ${jitterY}px)) rotate(${rot}deg)`;
             } else {
                 artRig.style.transform = `translate(-50%, -50%) rotate(0deg)`;
             }
 
-            // 6. Orbital Shards
+            // 6. Orbital Shard Explosion (following an elliptical path)
             const activeThreshold = Math.floor(norm * NUM_SHARDS);
             SHARDS.forEach((shard, i) => {
                 if (i < activeThreshold) {
                     shard.style.opacity = (Math.random() * 0.5 + 0.1) * norm;
-                    const bX = 1 + (artState.shardBiasX * norm);
-                    const bY = 1 + (artState.shardBiasY * norm);
-                    
-                    const expandX = Math.cos(shard.dataset.angle) * (parseFloat(shard.dataset.dist) + norm * 45) * bX;
-                    const expandY = Math.sin(shard.dataset.angle) * (parseFloat(shard.dataset.dist) + norm * 15) * bY;
-                    const r = parseFloat(shard.dataset.rot) + (norm * 270 * artState.rotSpeed);
-                    
+                    const expandX = Math.cos(shard.dataset.angle) * (parseFloat(shard.dataset.dist) + norm * 45);
+                    const expandY = Math.sin(shard.dataset.angle) * (parseFloat(shard.dataset.dist) + norm * 15);
+                    const r = parseFloat(shard.dataset.rot) + (norm * 270);
                     shard.style.transform = `translate(${expandX}vw, ${expandY}vw) rotate(${r}deg) scale(${norm * 2 + 0.5})`;
                 } else {
                     shard.style.opacity = 0;
@@ -556,27 +481,12 @@
             }
         }
 
-        function removeGlowAffordance() {
-            if (fader.classList.contains('glow-active')) {
-                fader.classList.remove('glow-active');
-            }
-        }
-
-        // Initialize Application
+        // Initialize UI & Canvas
         initDevice();
         initArt();
         
-        // Ensure fader fits immediately on load
-        setTimeout(resizeFader, 50); 
-        
-        // Fader Interactions
-        fader.addEventListener('input', () => {
-            removeGlowAffordance();
-            updateArtPhysics();
-        });
-        fader.addEventListener('mousedown', removeGlowAffordance);
-        fader.addEventListener('touchstart', removeGlowAffordance, {passive: true});
-        
+        // Fader Control Binding
+        fader.addEventListener('input', updateArtPhysics);
         updateArtPhysics();
 
         // Screen Swipe controls for iOS
@@ -585,7 +495,6 @@
         
         voidArea.addEventListener('touchstart', e => {
             touchStartY = e.touches[0].clientY;
-            removeGlowAffordance();
         }, {passive: true});
 
         voidArea.addEventListener('touchmove', e => {
