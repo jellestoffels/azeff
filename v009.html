@@ -124,14 +124,13 @@
             transform: translate(-50%, -50%);
             display: flex; justify-content: center; align-items: center;
             z-index: 2;
-            transition: transform 0s; /* Handled by JS dynamically */
         }
 
-        .ch-h, .ch-v, .ring, .core-dot {
+        .ch-h, .ch-v, .oval-main, .arc-inner, .core-dot {
             position: absolute;
             top: 50%; left: 50%;
             mix-blend-mode: screen;
-            transition: background 1.5s ease; /* Default transition: only colors */
+            transition: background 1.5s ease;
             pointer-events: none;
             transform-origin: center;
             will-change: transform, opacity;
@@ -151,12 +150,24 @@
             box-shadow: 0 0 15px var(--glow-color);
         }
 
-        .ring {
+        .oval-main {
+            background: linear-gradient(45deg, var(--grad-1), var(--grad-2));
+            -webkit-mask: radial-gradient(ellipse, transparent 65%, black 67%);
+            mask: radial-gradient(ellipse, transparent 65%, black 67%);
             border-radius: 50%;
             width: 100vw; height: 100vw;
             margin-left: -50vw; margin-top: -50vw;
-            -webkit-mask: radial-gradient(ellipse, transparent 63%, black 65%);
-            mask: radial-gradient(ellipse, transparent 63%, black 65%);
+            opacity: 0;
+        }
+
+        .arc-inner {
+            background: linear-gradient(-45deg, var(--grad-2), var(--grad-1));
+            -webkit-mask: radial-gradient(ellipse, transparent 60%, black 63%);
+            mask: radial-gradient(ellipse, transparent 60%, black 63%);
+            clip-path: polygon(0 20%, 100% 20%, 100% 80%, 0 80%);
+            border-radius: 50%;
+            width: 100vw; height: 100vw;
+            margin-left: -50vw; margin-top: -50vw;
             opacity: 0;
         }
 
@@ -391,7 +402,8 @@
         <div class="art-rig" id="artRig">
             <div class="ch-h" id="chH"></div>
             <div class="ch-v" id="chV"></div>
-            <div id="ringsContainer"></div>
+            <div class="oval-main" id="ovalMain"></div>
+            <div class="arc-inner" id="arcInner"></div>
             <div class="core-dot" id="coreDot"></div>
         </div>
 
@@ -418,8 +430,10 @@
         const artRig = document.getElementById('artRig');
         const chH = document.getElementById('chH');
         const chV = document.getElementById('chV');
+        const ovalMain = document.getElementById('ovalMain');
+        const arcInner = document.getElementById('arcInner');
         const coreDot = document.getElementById('coreDot');
-        const ringsContainer = document.getElementById('ringsContainer');
+        
         const shardField = document.getElementById('shardField');
         const strobe = document.getElementById('strobe');
         const matrix = document.getElementById('pad-matrix');
@@ -427,9 +441,6 @@
 
         const NUM_SHARDS = 45;
         const SHARDS = [];
-        
-        const MAX_RINGS = 5;
-        const RINGS = [];
 
         let artState = {
             stretchX: 1,
@@ -437,10 +448,11 @@
             rotSpeed: 1,
             shardBiasX: 1,
             shardBiasY: 1,
-            numRings: 2, // Starts with 2 rings
-            colorHue: 0
+            colorHue: 0,
+            hasColor: false
         };
 
+        // RAF state to throttle touch events for smooth mobile performance
         let isUpdating = false;
 
         function resizeFader() {
@@ -450,44 +462,23 @@
 
         window.addEventListener('resize', resizeFader);
 
-        // Function to inject a temporary CSS transition for the Shuffle snap
-        function applyTemporaryTransition() {
-            const elements = document.querySelectorAll('.ch-h, .ch-v, .ring, .core-dot, .shard, .art-rig');
-            elements.forEach(el => {
-                el.style.transition = 'transform 0.8s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.8s ease, background 1.5s ease';
-            });
-            
-            clearTimeout(window.shuffleTimeout);
-            window.shuffleTimeout = setTimeout(killTransitions, 850);
-        }
-
-        // Instantly strips the layout transition so the fader feels zero-latency again
-        function killTransitions() {
-            const elements = document.querySelectorAll('.ch-h, .ch-v, .ring, .core-dot, .shard, .art-rig');
-            elements.forEach(el => {
-                el.style.transition = 'background 1.5s ease';
-            });
-            clearTimeout(window.shuffleTimeout);
-        }
-
         function triggerShuffle() {
-            // Revert prominent styling
+            // Remove prominent styling on first interaction
             const shuffleBtn = document.querySelector('.shuffle-inverted');
             if(shuffleBtn) {
                 shuffleBtn.classList.remove('shuffle-inverted');
+                // Force reflow hack to ensure animation is destroyed cleanly
                 void shuffleBtn.offsetWidth; 
             }
 
-            // Apply a temporary CSS transition so the shapes morph smoothly
-            applyTemporaryTransition();
-
+            artState.hasColor = true;
             artState.colorHue = Math.floor(Math.random() * 360);
+            
             artState.stretchX = Math.random() * 1.5 + 0.5;
             artState.stretchY = Math.random() * 1.5 + 0.5;
             artState.rotSpeed = (Math.random() - 0.5) * 4; 
             artState.shardBiasX = (Math.random() - 0.5) * 2.5;
             artState.shardBiasY = (Math.random() - 0.5) * 2.5;
-            artState.numRings = Math.floor(Math.random() * MAX_RINGS) + 1; // Random 1 to 5
 
             const hue1 = artState.colorHue;
             const hue2 = (hue1 + 50) % 360; 
@@ -506,6 +497,7 @@
         function initDevice() {
             const NUM_PADS = 8; 
             
+            // Map actions. Top left is index 0. Functional cluster bottom right: 5,6,7.
             const actions = {
                 0: { text: "SHUFFLE", act: triggerShuffle, extraClass: "shuffle-inverted" },
                 5: { text: "LOG IN", act: () => alert("AUTH_SEQ_INIT") },
@@ -538,23 +530,6 @@
         }
 
         function initArt() {
-            // Generate Rings
-            for (let i = 0; i < MAX_RINGS; i++) {
-                const ring = document.createElement('div');
-                ring.className = 'ring';
-                
-                // Alternate gradient angles for depth distinction
-                if (i % 2 === 0) {
-                    ring.style.background = 'linear-gradient(45deg, var(--grad-1), var(--grad-2))';
-                } else {
-                    ring.style.background = 'linear-gradient(-45deg, var(--grad-2), var(--grad-1))';
-                }
-
-                ringsContainer.appendChild(ring);
-                RINGS.push(ring);
-            }
-
-            // Generate Shards
             for (let i = 0; i < NUM_SHARDS; i++) {
                 const shard = document.createElement('div');
                 shard.className = 'shard';
@@ -575,6 +550,7 @@
             }
         }
 
+        // High performance GPU update function utilizing only Transforms and Opacity
         function updateArtPhysics() {
             const val = parseInt(fader.value);
             const norm = val / 100;
@@ -587,17 +563,11 @@
             chV.style.transform = `scale(${thicknessScale}, ${norm * 0.75 * sY})`;
             chH.style.transform = `scale(${norm * 0.75 * sX}, ${thicknessScale})`;
 
-            // Dynamic Concentric Rings logic
-            RINGS.forEach((ring, i) => {
-                if (i < artState.numRings) {
-                    const sizeFactor = 0.85 - (i * 0.18); 
-                    ring.style.transform = `scale(${norm * sizeFactor * sX}, ${norm * sizeFactor * sY})`;
-                    ring.style.opacity = norm > 0.05 ? Math.min(1, norm * 2.5) : 0;
-                } else {
-                    ring.style.transform = `scale(0)`;
-                    ring.style.opacity = 0;
-                }
-            });
+            ovalMain.style.transform = `scale(${norm * 0.85 * sX}, ${norm * 0.35 * sY})`;
+            ovalMain.style.opacity = norm > 0.05 ? Math.min(1, norm * 2.5) : 0;
+            
+            arcInner.style.transform = `scale(${norm * 0.5 * sX}, ${norm * 0.35 * sY})`;
+            arcInner.style.opacity = norm > 0.1 ? Math.min(1, (norm - 0.1) * 3) : 0;
 
             const coreSizeScale = (((norm * 12) + (norm > 0.85 ? Math.random() * 4 : 0)) / 10) * ((sX+sY)/2);
             coreDot.style.transform = `scale(${coreSizeScale})`;
@@ -640,6 +610,7 @@
             }
         }
 
+        // Throttles function calls strictly to the device's refresh rate
         function scheduleUpdate() {
             if (!isUpdating) {
                 isUpdating = true;
@@ -651,9 +622,6 @@
         }
 
         function clearAffordance() {
-            // As soon as the user touches the fader, kill transitions to guarantee 0 latency dragging
-            killTransitions(); 
-            
             if (fader.classList.contains('glow-active')) {
                 fader.classList.remove('glow-active');
                 arrowIndicator.classList.remove('show-indicator');
