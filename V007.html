@@ -141,6 +141,7 @@
             width: 2px; height: 0;
         }
 
+        /* Gradient hollow rings via CSS Masking */
         .oval-main {
             background: linear-gradient(45deg, var(--grad-1), var(--grad-2));
             -webkit-mask: radial-gradient(ellipse, transparent 65%, black 67%);
@@ -164,6 +165,7 @@
             opacity: 0;
         }
 
+        /* Abstract orbiting shards */
         .shard-container {
             position: absolute;
             top: 50%; left: 50%;
@@ -183,7 +185,7 @@
             filter: drop-shadow(0 0 8px var(--glow-color));
         }
 
-        /* --- FLOATING CONTROL PANEL --- */
+        /* --- FLOATING CONTROL PANEL (Made 20% taller) --- */
         .device-panel {
             position: absolute;
             bottom: 40px;
@@ -204,6 +206,7 @@
             max-width: 550px;
         }
 
+        /* Matrix - 2 rows */
         .matrix {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -215,7 +218,7 @@
         .pad {
             width: 100%; 
             height: 100%;
-            min-height: 60px; 
+            min-height: 60px; /* Increased to make panel taller */
             background: var(--pad-off);
             border: 1px solid var(--pad-border);
             border-radius: 4px;
@@ -252,17 +255,7 @@
             box-shadow: 0 0 20px var(--glow-color);
         }
 
-        /* Shuffle Button Pulsating Glow */
-        .shuffle-glow {
-            animation: padPulse 2s infinite alternate ease-in-out;
-            border-color: #444 !important;
-        }
-
-        @keyframes padPulse {
-            0% { box-shadow: inset 0 2px 5px rgba(0,0,0,0.8), 0 0 5px rgba(255,255,255,0.05); color: #888; }
-            100% { box-shadow: inset 0 2px 5px rgba(0,0,0,0.8), 0 0 15px rgba(255,255,255,0.3); color: #fff; }
-        }
-
+        /* Fader Container scaling to new panel height */
         .fader-module {
             width: 90px;
             background: #050505;
@@ -278,6 +271,7 @@
         input[type="range"] {
             -webkit-appearance: none;
             appearance: none;
+            /* Width acts as height. Updated via JS to exactly fit container */
             width: 120px; 
             height: 70px; 
             background: transparent;
@@ -287,6 +281,7 @@
             z-index: 5;
         }
 
+        /* Thick Track */
         input[type="range"]::-webkit-slider-runnable-track {
             width: 100%;
             height: 22px; 
@@ -304,6 +299,7 @@
             box-shadow: inset 0 3px 8px rgba(0,0,0,1);
         }
 
+        /* Chunky Fader Thumb */
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             height: 48px; width: 38px; 
@@ -326,6 +322,7 @@
             transition: box-shadow 0.2s ease-out;
         }
 
+        /* --- FADER AFFORDANCE GLOW & ARROW --- */
         .glow-active::-webkit-slider-thumb {
             animation: thumbPulse 1.2s infinite alternate !important;
         }
@@ -338,16 +335,16 @@
             100% { box-shadow: 0 6px 12px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,1), 0 0 30px 10px rgba(255,255,255,0.6); }
         }
 
-        /* Animated Bouncing Arrow - Positioned Higher */
+        /* Animated Bouncing Arrow */
         .fader-indicator {
             position: absolute;
-            right: 8px; 
-            top: 20%; /* Moved up from 40% so it doesn't touch the fader handle */
+            right: 8px; /* sits to the right of the fader track */
+            top: 40%;
             width: 24px; height: 24px;
             color: #fff;
             pointer-events: none;
             transition: opacity 0.4s ease-out;
-            opacity: 0; 
+            opacity: 0; /* hidden by default, shown by class */
             z-index: 2;
         }
 
@@ -356,9 +353,9 @@
         }
 
         @keyframes arrowBounce {
-            0% { transform: translateY(10px); opacity: 0.2; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
-            50% { transform: translateY(-10px); opacity: 1; filter: drop-shadow(0 0 15px rgba(255,255,255,1)); }
-            100% { transform: translateY(10px); opacity: 0.2; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
+            0% { transform: translateY(15px); opacity: 0.2; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
+            50% { transform: translateY(-15px); opacity: 1; filter: drop-shadow(0 0 15px rgba(255,255,255,1)); }
+            100% { transform: translateY(15px); opacity: 0.2; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
         }
 
         @media (max-width: 600px) {
@@ -367,7 +364,7 @@
             }
             .fader-module { width: 75px; }
             .pad { min-height: 50px; font-size: 10px; }
-            .fader-indicator { right: 4px; width: 20px; height: 20px; top: 15%; }
+            .fader-indicator { right: 4px; width: 20px; height: 20px; }
         }
     </style>
 </head>
@@ -423,6 +420,7 @@
         const NUM_SHARDS = 45;
         const SHARDS = [];
 
+        // Dynamic State for Shuffle
         let artState = {
             stretchX: 1,
             stretchY: 1,
@@ -433,8 +431,10 @@
             hasColor: false
         };
 
+        // Size Fader dynamically to utilize 100% height of taller panel
         function resizeFader() {
             const containerHeight = faderContainer.clientHeight;
+            // Subtracting small offset for internal padding boundary
             fader.style.width = `${containerHeight - 16}px`; 
         }
 
@@ -444,21 +444,26 @@
             artState.hasColor = true;
             artState.colorHue = Math.floor(Math.random() * 360);
             
+            // Randomize geometric modifiers
             artState.stretchX = Math.random() * 1.5 + 0.5;
             artState.stretchY = Math.random() * 1.5 + 0.5;
             artState.rotSpeed = (Math.random() - 0.5) * 4; 
             artState.shardBiasX = (Math.random() - 0.5) * 2.5;
             artState.shardBiasY = (Math.random() - 0.5) * 2.5;
 
+            // Highly saturated pastels for internal element gradients
             const hue1 = artState.colorHue;
             const hue2 = (hue1 + 50) % 360; 
             
+            // Background ambient glow (soft)
             rootStyles.setProperty('--pastel-1', `hsla(${hue1}, 75%, 60%, 0.15)`);
             rootStyles.setProperty('--pastel-2', `hsla(${(hue1 + 180)%360}, 75%, 60%, 0.15)`);
             
+            // Internal Gradient Colors (Saturated, vivid pastels)
             rootStyles.setProperty('--grad-1', `hsl(${hue1}, 85%, 70%)`);
             rootStyles.setProperty('--grad-2', `hsl(${hue2}, 85%, 65%)`);
             
+            // Drop shadow tint matching the hue
             rootStyles.setProperty('--glow-color', `hsla(${hue1}, 80%, 65%, 0.5)`);
 
             updateArtPhysics();
@@ -467,34 +472,34 @@
         function initDevice() {
             const NUM_PADS = 8; 
             
-            // Map specific indices to actions to control grid layout
-            const actions = {
-                0: { text: "SHUFFLE", act: triggerShuffle, extraClass: "shuffle-glow" },
-                5: { text: "LOG IN", act: () => alert("AUTH_SEQ_INIT") },
-                6: { text: "INFO", act: () => alert("SYS_DATA_READ") },
-                7: { text: "CONTACT", act: () => alert("UPLINK_ESTAB") }
-            };
+            const bottomRowActions = [
+                { text: "SHUFFLE", act: triggerShuffle },
+                { text: "LOG IN", act: () => alert("AUTH_SEQ_INIT") },
+                { text: "INFO", act: () => alert("SYS_DATA_READ") },
+                { text: "CONTACT", act: () => alert("UPLINK_ESTAB") }
+            ];
 
             for(let i = 0; i < NUM_PADS; i++) {
                 const pad = document.createElement('div');
                 pad.className = 'pad';
                 
-                if (actions[i]) {
-                    const action = actions[i];
+                // Top Row Ghost symbols
+                if (i < 4) {
+                    const symbols = ["+", "-", "·", "::", "||", "x", ""];
+                    pad.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                } 
+                // Bottom Row Functional Actions
+                else {
+                    const action = bottomRowActions[i - 4];
                     pad.classList.add('active');
-                    if(action.extraClass) pad.classList.add(action.extraClass);
-                    
                     pad.innerText = action.text;
+                    
                     pad.addEventListener('touchstart', (e) => {
                         e.preventDefault(); 
                         action.act();
                     });
                     pad.onclick = action.act;
-                } else {
-                    const symbols = ["+", "-", "·", "::", "||", "x", ""];
-                    pad.innerText = symbols[Math.floor(Math.random() * symbols.length)];
                 }
-                
                 matrix.appendChild(pad);
             }
         }
@@ -527,25 +532,30 @@
             const sX = artState.stretchX;
             const sY = artState.stretchY;
 
+            // 1. Crosshairs expanding
             chV.style.height = `${norm * 150 * sY}vh`;
             chH.style.width = `${norm * 150 * sX}vw`;
             const thickness = val === 100 ? 12 : (2 + norm * 5);
             chV.style.width = `${thickness}px`;
             chH.style.height = `${thickness}px`;
 
+            // 2. Logo Main Oval shaping 
             ovalMain.style.width = `${norm * 85 * sX}vw`;
             ovalMain.style.height = `${norm * 35 * sY}vw`;
             ovalMain.style.opacity = norm > 0.05 ? Math.min(1, norm * 2.5) : 0;
             
+            // 3. Inner Arcs
             arcInner.style.width = `${norm * 50 * sX}vw`;
             arcInner.style.height = `${norm * 35 * sY}vw`;
             arcInner.style.opacity = norm > 0.1 ? Math.min(1, (norm - 0.1) * 3) : 0;
 
+            // 4. Central Core Pupil
             const coreSize = (norm * 12) + (norm > 0.85 ? Math.random() * 4 : 0);
             coreDot.style.width = `${coreSize * ((sX+sY)/2)}vw`;
             coreDot.style.height = `${coreSize * ((sX+sY)/2)}vw`;
             coreDot.style.opacity = norm > 0.15 ? 1 : 0;
 
+            // 5. Rig Distortion
             if (norm > 0.5) {
                 const rot = (norm - 0.5) * 45 * artState.rotSpeed; 
                 const jitterX = (Math.random() - 0.5) * (norm - 0.5) * 20;
@@ -555,6 +565,7 @@
                 artRig.style.transform = `translate(-50%, -50%) rotate(0deg)`;
             }
 
+            // 6. Orbital Shards
             const activeThreshold = Math.floor(norm * NUM_SHARDS);
             SHARDS.forEach((shard, i) => {
                 if (i < activeThreshold) {
@@ -573,6 +584,7 @@
                 }
             });
 
+            // 7. Strobe Chaos
             if (norm > 0.88) {
                 const flicker = Math.random() > 0.4 ? (norm - 0.8) * 5 : 0;
                 strobe.style.opacity = flicker;
@@ -583,6 +595,7 @@
             }
         }
 
+        // Permanently clear glow affordances once user interacts
         function clearAffordance() {
             if (fader.classList.contains('glow-active')) {
                 fader.classList.remove('glow-active');
@@ -591,11 +604,14 @@
             }
         }
 
+        // Initialize Application
         initDevice();
         initArt();
         
+        // Timeout ensures CSS is painted before calculating height for the rotated fader
         setTimeout(resizeFader, 100); 
         
+        // Fader Interactions
         fader.addEventListener('input', () => {
             clearAffordance();
             updateArtPhysics();
@@ -605,6 +621,7 @@
         
         updateArtPhysics();
 
+        // Screen Swipe controls for iOS
         let touchStartY = 0;
         const voidArea = document.getElementById('voidSpace');
         
