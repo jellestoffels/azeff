@@ -53,7 +53,6 @@
             z-index: 0;
             transition: background 1.5s ease-in-out;
             pointer-events: none;
-            will-change: background;
         }
 
         /* Extreme Grain Overlay */
@@ -113,14 +112,12 @@
             z-index: 10;
             pointer-events: none;
             mix-blend-mode: exclusion;
-            will-change: opacity;
         }
 
-        /* --- GPU ACCELERATED LOGO ART RIG --- */
+        /* --- LOGO-INSPIRED PARAMETRIC ART --- */
         .art-rig {
             position: absolute;
             top: 50%; left: 50%;
-            width: 0; height: 0;
             transform: translate(-50%, -50%);
             display: flex; justify-content: center; align-items: center;
             z-index: 2;
@@ -128,26 +125,20 @@
 
         .ch-h, .ch-v, .oval-main, .arc-inner, .core-dot {
             position: absolute;
-            top: 50%; left: 50%;
             mix-blend-mode: screen;
-            transition: background 1.5s ease;
+            transition: all 0.1s ease-out, background 1.5s ease, filter 1.5s ease;
             pointer-events: none;
-            transform-origin: center;
-            will-change: transform, opacity;
+            filter: drop-shadow(0 0 12px var(--glow-color));
         }
 
         .ch-h {
             background: linear-gradient(90deg, var(--grad-1), var(--grad-2));
-            width: 200vw; height: 2px;
-            margin-left: -100vw; margin-top: -1px;
-            box-shadow: 0 0 15px var(--glow-color);
+            height: 2px; width: 0;
         }
 
         .ch-v {
             background: linear-gradient(180deg, var(--grad-1), var(--grad-2));
-            width: 2px; height: 200vh;
-            margin-left: -1px; margin-top: -100vh;
-            box-shadow: 0 0 15px var(--glow-color);
+            width: 2px; height: 0;
         }
 
         .oval-main {
@@ -155,8 +146,6 @@
             -webkit-mask: radial-gradient(ellipse, transparent 65%, black 67%);
             mask: radial-gradient(ellipse, transparent 65%, black 67%);
             border-radius: 50%;
-            width: 100vw; height: 100vw;
-            margin-left: -50vw; margin-top: -50vw;
             opacity: 0;
         }
 
@@ -166,16 +155,12 @@
             mask: radial-gradient(ellipse, transparent 60%, black 63%);
             clip-path: polygon(0 20%, 100% 20%, 100% 80%, 0 80%);
             border-radius: 50%;
-            width: 100vw; height: 100vw;
-            margin-left: -50vw; margin-top: -50vw;
             opacity: 0;
         }
 
         .core-dot {
             background: radial-gradient(circle, var(--grad-1) 0%, var(--grad-2) 100%);
             border-radius: 50%;
-            width: 20vw; height: 20vw;
-            margin-left: -10vw; margin-top: -10vw;
             opacity: 0;
         }
 
@@ -193,10 +178,9 @@
             opacity: 0;
             transform-origin: center;
             mix-blend-mode: screen;
-            transition: background 1.5s ease;
+            transition: opacity 0.2s, transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1), background 1.5s ease;
             border-radius: 1px;
-            box-shadow: 0 0 8px var(--glow-color);
-            will-change: transform, opacity;
+            filter: drop-shadow(0 0 8px var(--glow-color));
         }
 
         /* --- FLOATING CONTROL PANEL --- */
@@ -243,7 +227,7 @@
             letter-spacing: 0.5px;
             display: flex; justify-content: center; align-items: center;
             box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
-            transition: all 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
+            transition: all 0.1s;
         }
 
         .pad.active {
@@ -266,22 +250,17 @@
             background: var(--grad-1);
             color: var(--bg);
             box-shadow: 0 0 20px var(--glow-color);
-            transition: all 0s;
         }
 
-        /* PROMINENT INVERTED SHUFFLE BUTTON */
-        .shuffle-inverted {
-            background: var(--fg) !important;
-            color: var(--bg) !important;
-            border-color: #fff !important;
-            animation: invertPulse 2.5s infinite alternate ease-in-out;
-            text-shadow: none;
-            box-shadow: inset 0 0 0 rgba(0,0,0,0) !important;
+        /* Shuffle Button Pulsating Glow */
+        .shuffle-glow {
+            animation: padPulse 2s infinite alternate ease-in-out;
+            border-color: #444 !important;
         }
 
-        @keyframes invertPulse {
-            0% { box-shadow: 0 0 10px rgba(255,255,255,0.3); transform: scale(1); }
-            100% { box-shadow: 0 0 25px rgba(255,255,255,0.8); transform: scale(1.05); }
+        @keyframes padPulse {
+            0% { box-shadow: inset 0 2px 5px rgba(0,0,0,0.8), 0 0 5px rgba(255,255,255,0.05); color: #888; }
+            100% { box-shadow: inset 0 2px 5px rgba(0,0,0,0.8), 0 0 15px rgba(255,255,255,0.3); color: #fff; }
         }
 
         .fader-module {
@@ -309,7 +288,8 @@
         }
 
         input[type="range"]::-webkit-slider-runnable-track {
-            width: 100%; height: 22px; 
+            width: 100%;
+            height: 22px; 
             background: var(--fader-track);
             border: 1px solid #111;
             border-radius: 3px;
@@ -358,10 +338,11 @@
             100% { box-shadow: 0 6px 12px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,1), 0 0 30px 10px rgba(255,255,255,0.6); }
         }
 
+        /* Animated Bouncing Arrow - Positioned Higher */
         .fader-indicator {
             position: absolute;
             right: 8px; 
-            top: 20%; 
+            top: 20%; /* Moved up from 40% so it doesn't touch the fader handle */
             width: 24px; height: 24px;
             color: #fff;
             pointer-events: none;
@@ -452,9 +433,6 @@
             hasColor: false
         };
 
-        // RAF state to throttle touch events for smooth mobile performance
-        let isUpdating = false;
-
         function resizeFader() {
             const containerHeight = faderContainer.clientHeight;
             fader.style.width = `${containerHeight - 16}px`; 
@@ -463,14 +441,6 @@
         window.addEventListener('resize', resizeFader);
 
         function triggerShuffle() {
-            // Remove prominent styling on first interaction
-            const shuffleBtn = document.querySelector('.shuffle-inverted');
-            if(shuffleBtn) {
-                shuffleBtn.classList.remove('shuffle-inverted');
-                // Force reflow hack to ensure animation is destroyed cleanly
-                void shuffleBtn.offsetWidth; 
-            }
-
             artState.hasColor = true;
             artState.colorHue = Math.floor(Math.random() * 360);
             
@@ -491,15 +461,15 @@
             
             rootStyles.setProperty('--glow-color', `hsla(${hue1}, 80%, 65%, 0.5)`);
 
-            scheduleUpdate();
+            updateArtPhysics();
         }
 
         function initDevice() {
             const NUM_PADS = 8; 
             
-            // Map actions. Top left is index 0. Functional cluster bottom right: 5,6,7.
+            // Map specific indices to actions to control grid layout
             const actions = {
-                0: { text: "SHUFFLE", act: triggerShuffle, extraClass: "shuffle-inverted" },
+                0: { text: "SHUFFLE", act: triggerShuffle, extraClass: "shuffle-glow" },
                 5: { text: "LOG IN", act: () => alert("AUTH_SEQ_INIT") },
                 6: { text: "INFO", act: () => alert("SYS_DATA_READ") },
                 7: { text: "CONTACT", act: () => alert("UPLINK_ESTAB") }
@@ -550,7 +520,6 @@
             }
         }
 
-        // High performance GPU update function utilizing only Transforms and Opacity
         function updateArtPhysics() {
             const val = parseInt(fader.value);
             const norm = val / 100;
@@ -558,19 +527,23 @@
             const sX = artState.stretchX;
             const sY = artState.stretchY;
 
-            const thicknessScale = (val === 100 ? 12 : (2 + norm * 5)) / 2;
-            
-            chV.style.transform = `scale(${thicknessScale}, ${norm * 0.75 * sY})`;
-            chH.style.transform = `scale(${norm * 0.75 * sX}, ${thicknessScale})`;
+            chV.style.height = `${norm * 150 * sY}vh`;
+            chH.style.width = `${norm * 150 * sX}vw`;
+            const thickness = val === 100 ? 12 : (2 + norm * 5);
+            chV.style.width = `${thickness}px`;
+            chH.style.height = `${thickness}px`;
 
-            ovalMain.style.transform = `scale(${norm * 0.85 * sX}, ${norm * 0.35 * sY})`;
+            ovalMain.style.width = `${norm * 85 * sX}vw`;
+            ovalMain.style.height = `${norm * 35 * sY}vw`;
             ovalMain.style.opacity = norm > 0.05 ? Math.min(1, norm * 2.5) : 0;
             
-            arcInner.style.transform = `scale(${norm * 0.5 * sX}, ${norm * 0.35 * sY})`;
+            arcInner.style.width = `${norm * 50 * sX}vw`;
+            arcInner.style.height = `${norm * 35 * sY}vw`;
             arcInner.style.opacity = norm > 0.1 ? Math.min(1, (norm - 0.1) * 3) : 0;
 
-            const coreSizeScale = (((norm * 12) + (norm > 0.85 ? Math.random() * 4 : 0)) / 10) * ((sX+sY)/2);
-            coreDot.style.transform = `scale(${coreSizeScale})`;
+            const coreSize = (norm * 12) + (norm > 0.85 ? Math.random() * 4 : 0);
+            coreDot.style.width = `${coreSize * ((sX+sY)/2)}vw`;
+            coreDot.style.height = `${coreSize * ((sX+sY)/2)}vw`;
             coreDot.style.opacity = norm > 0.15 ? 1 : 0;
 
             if (norm > 0.5) {
@@ -610,17 +583,6 @@
             }
         }
 
-        // Throttles function calls strictly to the device's refresh rate
-        function scheduleUpdate() {
-            if (!isUpdating) {
-                isUpdating = true;
-                requestAnimationFrame(() => {
-                    updateArtPhysics();
-                    isUpdating = false;
-                });
-            }
-        }
-
         function clearAffordance() {
             if (fader.classList.contains('glow-active')) {
                 fader.classList.remove('glow-active');
@@ -636,12 +598,12 @@
         
         fader.addEventListener('input', () => {
             clearAffordance();
-            scheduleUpdate();
+            updateArtPhysics();
         });
         fader.addEventListener('mousedown', clearAffordance);
         fader.addEventListener('touchstart', clearAffordance, {passive: true});
         
-        scheduleUpdate();
+        updateArtPhysics();
 
         let touchStartY = 0;
         const voidArea = document.getElementById('voidSpace');
@@ -659,7 +621,7 @@
                 let newVal = parseInt(fader.value) + (diff * 0.5);
                 newVal = Math.max(0, Math.min(100, newVal));
                 fader.value = newVal;
-                scheduleUpdate();
+                updateArtPhysics();
                 touchStartY = touchEndY; 
             }
         }, {passive: true});
