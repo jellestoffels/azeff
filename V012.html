@@ -91,15 +91,16 @@
         }
 
         header img.icon {
-            height: 75px;
-            width: auto;
+            width: 65px;
+            height: auto;
             filter: contrast(200%) grayscale(100%);
         }
 
         header img.wordmark {
-            height: 75px;
+            height: 28px;
             width: auto;
             filter: contrast(200%) grayscale(100%);
+            margin-top: 4px;
         }
 
         /* --- FULLSCREEN VOID CANVAS --- */
@@ -299,8 +300,8 @@
             margin-bottom: 25px;
             gap: 15px;
         }
-        .login-logo img.icon { height: 60px; width: auto; }
-        .login-logo img.wordmark { height: 60px; width: auto; }
+        .login-logo img.icon { width: 50px; height: auto; }
+        .login-logo img.wordmark { height: 22px; width: auto; margin-top: 4px; }
         
         .login-form {
             display: flex; flex-direction: column; gap: 15px;
@@ -404,7 +405,7 @@
 
         .prominent-btn:active {
             transform: scale(0.95);
-            animation: none !important;
+            animation: none !important; /* Stop pulse while holding */
             background: #aaa !important;
             box-shadow: 0 0 30px var(--glow-color) !important;
         }
@@ -505,15 +506,13 @@
         }
 
         @media (max-width: 600px) {
-            header { top: 1.5rem; left: 1.5rem; gap: 10px; }
-            header img.icon { height: 45px; }
-            header img.wordmark { height: 45px; }
+            header img.icon { width: 45px; }
+            header img.wordmark { height: 20px; margin-top: 2px; }
             .device-panel { bottom: 25px; padding: 16px; gap: 12px; }
             .fader-module { width: 75px; }
             .pad { min-height: 50px; font-size: 10px; }
             .fader-indicator { right: 4px; width: 20px; height: 20px; top: 15%; }
             .imprint-modal { max-height: 60vh; font-size: 0.75rem; padding: 16px; bottom: calc(100% + 15px); }
-            .login-logo img.icon, .login-logo img.wordmark { height: 45px; }
         }
     </style>
 </head>
@@ -614,6 +613,7 @@
         }
         window.addEventListener('resize', resizeFader);
 
+        // UI OVERLAYS (IMPRINT & LOGIN)
         let imprintLoaded = false;
         async function toggleImprint() {
             imprintModal.classList.toggle('show');
@@ -635,6 +635,7 @@
 
         function toggleLogin() {
             loginOverlay.classList.toggle('show');
+            // Auto-focus the input if opening
             if(loginOverlay.classList.contains('show')) {
                 setTimeout(() => {
                     const passInput = loginOverlay.querySelector('input[type="password"]');
@@ -643,6 +644,7 @@
             }
         }
 
+        // FLASH LOGIC
         function startFlash(e) {
             if(e) e.preventDefault();
             if(isFlashing) return;
@@ -665,6 +667,7 @@
             requestAnimationFrame(flashLoop);
         }
 
+        // SHUFFLE LOGIC
         function applyTemporaryTransition() {
             const elements = document.querySelectorAll('.ch-h, .ch-v, .ring, .core-dot, .shard, .art-rig');
             elements.forEach(el => {
@@ -683,6 +686,7 @@
         }
 
         function triggerShuffle() {
+            // Remove prominent styling visually from SHUFFLE after first use
             const shuffleBtn = document.getElementById('btn-shuffle');
             if(shuffleBtn) {
                 shuffleBtn.classList.remove('prominent-btn');
@@ -716,6 +720,7 @@
         function initDevice() {
             const NUM_PADS = 8; 
             
+            // Map buttons: 0: SHUFFLE, 1: FLASH (next to each other top left). 6: IMPRINT, 7: LOG IN.
             const actions = {
                 0: { id: "btn-shuffle", text: "SHUFFLE", act: triggerShuffle, extraClass: "prominent-btn" },
                 1: { id: "btn-flash", text: "FLASH", extraClass: "prominent-btn", isHold: true },
@@ -795,6 +800,7 @@
             const sX = artState.stretchX;
             const sY = artState.stretchY;
 
+            // Base Calculations
             const thicknessScale = (val === 100 ? 12 : (2 + norm * 5)) / 2;
             let chV_scale = `scale(${thicknessScale}, ${norm * 0.75 * sY})`;
             let chH_scale = `scale(${norm * 0.75 * sX}, ${thicknessScale})`;
@@ -809,6 +815,7 @@
                 rig_transform = `translate(calc(-50% + ${jitterX}px), calc(-50% + ${jitterY}px)) rotate(${rot}deg)`;
             }
 
+            // Apply FLASH Chaos Overrides
             if (isFlashing) {
                 const rx = (Math.random() - 0.5) * 50;
                 const ry = (Math.random() - 0.5) * 50;
@@ -826,12 +833,14 @@
                 voidSpace.style.backgroundColor = '#000';
             }
 
+            // Apply Transforms
             chV.style.transform = chV_scale;
             chH.style.transform = chH_scale;
             coreDot.style.transform = core_scale;
             coreDot.style.opacity = norm > 0.15 || isFlashing ? 1 : 0;
             artRig.style.transform = rig_transform;
 
+            // Rings Update
             RINGS.forEach((ring, i) => {
                 if (i < artState.numRings) {
                     const sizeFactor = 0.85 - (i * 0.18); 
@@ -844,6 +853,7 @@
                 }
             });
 
+            // Shards Update
             const activeThreshold = Math.floor(norm * NUM_SHARDS);
             SHARDS.forEach((shard, i) => {
                 if (isFlashing) {

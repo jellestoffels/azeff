@@ -78,27 +78,17 @@
             90% { transform: translate(-1%, 7%); }
         }
 
-        /* HEADER & LOGOS */
         header {
             position: absolute;
             top: 2rem;
             left: 2rem;
             z-index: 100;
             mix-blend-mode: difference;
-            display: flex;
-            align-items: center;
-            gap: 15px;
         }
 
-        header img.icon {
-            height: 75px;
-            width: auto;
-            filter: contrast(200%) grayscale(100%);
-        }
-
-        header img.wordmark {
-            height: 75px;
-            width: auto;
+        header img {
+            width: 65px;
+            height: auto;
             filter: contrast(200%) grayscale(100%);
         }
 
@@ -113,7 +103,6 @@
             background: var(--bg);
             overflow: hidden;
             z-index: 1;
-            will-change: filter, background-color;
         }
 
         .strobe-flash {
@@ -135,14 +124,14 @@
             transform: translate(-50%, -50%);
             display: flex; justify-content: center; align-items: center;
             z-index: 2;
-            transition: transform 0s;
+            transition: transform 0s; /* Handled by JS dynamically */
         }
 
         .ch-h, .ch-v, .ring, .core-dot {
             position: absolute;
             top: 50%; left: 50%;
             mix-blend-mode: screen;
-            transition: background 1.5s ease;
+            transition: background 1.5s ease; /* Default transition: only colors */
             pointer-events: none;
             transform-origin: center;
             will-change: transform, opacity;
@@ -197,129 +186,6 @@
             border-radius: 1px;
             box-shadow: 0 0 8px var(--glow-color);
             will-change: transform, opacity;
-        }
-
-        /* --- IMPRINT MODAL --- */
-        .imprint-modal {
-            position: absolute;
-            bottom: calc(100% + 20px);
-            left: 0;
-            width: 100%;
-            max-height: 50vh;
-            background: rgba(20, 20, 20, 0.95);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid var(--panel-border);
-            border-radius: 8px;
-            padding: 24px;
-            color: #b0b0b0;
-            font-size: 0.85rem;
-            line-height: 1.6;
-            overflow-y: auto;
-            z-index: 90;
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(15px);
-            transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.9);
-            text-align: left;
-        }
-
-        .imprint-modal.show {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateY(0);
-        }
-
-        .imprint-modal h1, .imprint-modal h2 {
-            color: var(--fg);
-            margin-bottom: 1rem;
-            font-family: monospace;
-            text-transform: uppercase;
-        }
-
-        .imprint-modal p { margin-bottom: 1rem; }
-        
-        .imprint-modal .close-btn {
-            position: absolute;
-            top: 15px; right: 15px;
-            background: none; border: none;
-            color: #fff; font-size: 1.5rem;
-            cursor: pointer; opacity: 0.5;
-        }
-        .imprint-modal .close-btn:hover { opacity: 1; }
-
-        /* --- LOGIN OVERLAY --- */
-        .login-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.4s ease;
-        }
-        .login-overlay.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .login-panel {
-            background: var(--panel);
-            border: 1px solid var(--panel-border);
-            padding: 40px;
-            border-radius: 8px;
-            text-align: center;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.9);
-            position: relative;
-            transform: translateY(20px) scale(0.95);
-            transition: transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
-        }
-        .login-overlay.show .login-panel {
-            transform: translateY(0) scale(1);
-        }
-        .login-close {
-            position: absolute;
-            top: 15px; right: 15px;
-            background: none; border: none;
-            color: #fff; font-size: 1.5rem;
-            cursor: pointer; opacity: 0.5;
-        }
-        .login-close:hover { opacity: 1; }
-        .login-logo {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 25px;
-            gap: 15px;
-        }
-        .login-logo img.icon { height: 60px; width: auto; }
-        .login-logo img.wordmark { height: 60px; width: auto; }
-        
-        .login-form {
-            display: flex; flex-direction: column; gap: 15px;
-        }
-        .login-form input {
-            background: #000; border: 1px solid #333; color: #fff;
-            padding: 14px; border-radius: 4px; font-family: monospace;
-            outline: none; text-align: center; font-size: 1rem;
-        }
-        .login-form input:focus { border-color: #777; }
-        .login-form button {
-            background: var(--fg); color: var(--bg); border: none;
-            padding: 14px; font-weight: bold; font-family: monospace;
-            cursor: pointer; border-radius: 4px; text-transform: uppercase;
-            font-size: 1rem; transition: background 0.2s, box-shadow 0.2s;
-        }
-        .login-form button:hover { 
-            background: #fff; 
-            box-shadow: 0 0 15px rgba(255,255,255,0.4); 
         }
 
         /* --- FLOATING CONTROL PANEL --- */
@@ -392,21 +258,14 @@
             transition: all 0s;
         }
 
-        /* PROMINENT INVERTED BUTTONS (SHUFFLE & FLASH) */
-        .prominent-btn {
+        /* PROMINENT INVERTED SHUFFLE BUTTON */
+        .shuffle-inverted {
             background: var(--fg) !important;
             color: var(--bg) !important;
             border-color: #fff !important;
             animation: invertPulse 2.5s infinite alternate ease-in-out;
             text-shadow: none;
             box-shadow: inset 0 0 0 rgba(0,0,0,0) !important;
-        }
-
-        .prominent-btn:active {
-            transform: scale(0.95);
-            animation: none !important;
-            background: #aaa !important;
-            box-shadow: 0 0 30px var(--glow-color) !important;
         }
 
         @keyframes invertPulse {
@@ -476,8 +335,12 @@
             transition: box-shadow 0.2s ease-out;
         }
 
-        .glow-active::-webkit-slider-thumb { animation: thumbPulse 1.2s infinite alternate !important; }
-        .glow-active::-moz-range-thumb { animation: thumbPulse 1.2s infinite alternate !important; }
+        .glow-active::-webkit-slider-thumb {
+            animation: thumbPulse 1.2s infinite alternate !important;
+        }
+        .glow-active::-moz-range-thumb {
+            animation: thumbPulse 1.2s infinite alternate !important;
+        }
 
         @keyframes thumbPulse {
             0% { box-shadow: 0 6px 12px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,0.8), 0 0 5px rgba(255,255,255,0.1); }
@@ -496,7 +359,9 @@
             z-index: 2;
         }
 
-        .show-indicator { animation: arrowBounce 1.5s infinite cubic-bezier(0.4, 0, 0.2, 1); }
+        .show-indicator {
+            animation: arrowBounce 1.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
         @keyframes arrowBounce {
             0% { transform: translateY(10px); opacity: 0.2; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
@@ -505,15 +370,12 @@
         }
 
         @media (max-width: 600px) {
-            header { top: 1.5rem; left: 1.5rem; gap: 10px; }
-            header img.icon { height: 45px; }
-            header img.wordmark { height: 45px; }
-            .device-panel { bottom: 25px; padding: 16px; gap: 12px; }
+            .device-panel {
+                bottom: 25px; padding: 16px; gap: 12px;
+            }
             .fader-module { width: 75px; }
             .pad { min-height: 50px; font-size: 10px; }
             .fader-indicator { right: 4px; width: 20px; height: 20px; top: 15%; }
-            .imprint-modal { max-height: 60vh; font-size: 0.75rem; padding: 16px; bottom: calc(100% + 15px); }
-            .login-logo img.icon, .login-logo img.wordmark { height: 45px; }
         }
     </style>
 </head>
@@ -521,10 +383,7 @@
 
     <div class="ambient-bg"></div>
     <div class="noise"></div>
-    <header>
-        <img src="AZEFF_Icon-White.png" alt="AZEFF Logo" class="icon">
-        <img src="AZEFF_Wordmark-White.png" alt="AZEFF" class="wordmark">
-    </header>
+    <header><img src="AZEFF_Icon-White.png" alt="AZEFF Logo"></header>
 
     <div class="void-space" id="voidSpace">
         <div class="strobe-flash" id="strobe"></div>
@@ -539,26 +398,7 @@
         <div class="shard-container" id="shardField"></div>
     </div>
 
-    <div class="login-overlay" id="loginOverlay">
-        <div class="login-panel">
-            <button class="login-close" onclick="toggleLogin()">✕</button>
-            <div class="login-logo">
-                <img src="AZEFF_Icon-White.png" alt="AZEFF" class="icon">
-                <img src="AZEFF_Wordmark-White.png" alt="AZEFF" class="wordmark">
-            </div>
-            <form class="login-form" onsubmit="event.preventDefault(); alert('Authentication processing...');">
-                <input placeholder="Enter password" type="password" required>
-                <button type="submit">Enter</button>
-            </form>
-        </div>
-    </div>
-
-    <div class="device-panel" id="devicePanel">
-        <div class="imprint-modal" id="imprintModal">
-            <button class="close-btn" onclick="toggleImprint()">×</button>
-            <div id="imprintContent">Loading imprint...</div>
-        </div>
-
+    <div class="device-panel">
         <div class="matrix" id="pad-matrix">
             </div>
         
@@ -583,15 +423,11 @@
         const shardField = document.getElementById('shardField');
         const strobe = document.getElementById('strobe');
         const matrix = document.getElementById('pad-matrix');
-        const voidSpace = document.getElementById('voidSpace');
         const rootStyles = document.documentElement.style;
-
-        const imprintModal = document.getElementById('imprintModal');
-        const imprintContent = document.getElementById('imprintContent');
-        const loginOverlay = document.getElementById('loginOverlay');
 
         const NUM_SHARDS = 45;
         const SHARDS = [];
+        
         const MAX_RINGS = 5;
         const RINGS = [];
 
@@ -601,79 +437,31 @@
             rotSpeed: 1,
             shardBiasX: 1,
             shardBiasY: 1,
-            numRings: 2, 
+            numRings: 2, // Starts with 2 rings
             colorHue: 0
         };
 
         let isUpdating = false;
-        let isFlashing = false;
 
         function resizeFader() {
             const containerHeight = faderContainer.clientHeight;
             fader.style.width = `${containerHeight - 16}px`; 
         }
+
         window.addEventListener('resize', resizeFader);
 
-        let imprintLoaded = false;
-        async function toggleImprint() {
-            imprintModal.classList.toggle('show');
-            if (imprintModal.classList.contains('show') && !imprintLoaded) {
-                try {
-                    const response = await fetch('imprint.html');
-                    if (response.ok) {
-                        const text = await response.text();
-                        imprintContent.innerHTML = text;
-                    } else {
-                        imprintContent.innerHTML = '<p>Error loading imprint content. Ensure imprint.html exists.</p>';
-                    }
-                } catch (error) {
-                    imprintContent.innerHTML = '<p>Could not load imprint.html due to local cross-origin restrictions. Please run via a local server.</p>';
-                }
-                imprintLoaded = true;
-            }
-        }
-
-        function toggleLogin() {
-            loginOverlay.classList.toggle('show');
-            if(loginOverlay.classList.contains('show')) {
-                setTimeout(() => {
-                    const passInput = loginOverlay.querySelector('input[type="password"]');
-                    if(passInput) passInput.focus();
-                }, 100);
-            }
-        }
-
-        function startFlash(e) {
-            if(e) e.preventDefault();
-            if(isFlashing) return;
-            isFlashing = true;
-            flashLoop();
-        }
-
-        function stopFlash(e) {
-            if(e) e.preventDefault();
-            isFlashing = false;
-            voidSpace.style.backgroundColor = '#000';
-            voidSpace.style.filter = 'none';
-            strobe.style.opacity = 0;
-            scheduleUpdate(); 
-        }
-
-        function flashLoop() {
-            if(!isFlashing) return;
-            updateArtPhysics(); 
-            requestAnimationFrame(flashLoop);
-        }
-
+        // Function to inject a temporary CSS transition for the Shuffle snap
         function applyTemporaryTransition() {
             const elements = document.querySelectorAll('.ch-h, .ch-v, .ring, .core-dot, .shard, .art-rig');
             elements.forEach(el => {
                 el.style.transition = 'transform 0.8s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.8s ease, background 1.5s ease';
             });
+            
             clearTimeout(window.shuffleTimeout);
             window.shuffleTimeout = setTimeout(killTransitions, 850);
         }
 
+        // Instantly strips the layout transition so the fader feels zero-latency again
         function killTransitions() {
             const elements = document.querySelectorAll('.ch-h, .ch-v, .ring, .core-dot, .shard, .art-rig');
             elements.forEach(el => {
@@ -683,12 +471,14 @@
         }
 
         function triggerShuffle() {
-            const shuffleBtn = document.getElementById('btn-shuffle');
+            // Revert prominent styling
+            const shuffleBtn = document.querySelector('.shuffle-inverted');
             if(shuffleBtn) {
-                shuffleBtn.classList.remove('prominent-btn');
+                shuffleBtn.classList.remove('shuffle-inverted');
                 void shuffleBtn.offsetWidth; 
             }
 
+            // Apply a temporary CSS transition so the shapes morph smoothly
             applyTemporaryTransition();
 
             artState.colorHue = Math.floor(Math.random() * 360);
@@ -697,7 +487,7 @@
             artState.rotSpeed = (Math.random() - 0.5) * 4; 
             artState.shardBiasX = (Math.random() - 0.5) * 2.5;
             artState.shardBiasY = (Math.random() - 0.5) * 2.5;
-            artState.numRings = Math.floor(Math.random() * MAX_RINGS) + 1; 
+            artState.numRings = Math.floor(Math.random() * MAX_RINGS) + 1; // Random 1 to 5
 
             const hue1 = artState.colorHue;
             const hue2 = (hue1 + 50) % 360; 
@@ -717,10 +507,10 @@
             const NUM_PADS = 8; 
             
             const actions = {
-                0: { id: "btn-shuffle", text: "SHUFFLE", act: triggerShuffle, extraClass: "prominent-btn" },
-                1: { id: "btn-flash", text: "FLASH", extraClass: "prominent-btn", isHold: true },
-                6: { text: "IMPRINT", act: toggleImprint },
-                7: { text: "LOG IN", act: toggleLogin }
+                0: { text: "SHUFFLE", act: triggerShuffle, extraClass: "shuffle-inverted" },
+                5: { text: "LOG IN", act: () => alert("AUTH_SEQ_INIT") },
+                6: { text: "INFO", act: () => alert("SYS_DATA_READ") },
+                7: { text: "CONTACT", act: () => alert("UPLINK_ESTAB") }
             };
 
             for(let i = 0; i < NUM_PADS; i++) {
@@ -730,25 +520,14 @@
                 if (actions[i]) {
                     const action = actions[i];
                     pad.classList.add('active');
-                    if(action.id) pad.id = action.id;
-                    if(action.extraClass) pad.classList.add(...action.extraClass.split(" "));
-                    pad.innerText = action.text;
+                    if(action.extraClass) pad.classList.add(action.extraClass);
                     
-                    if (action.isHold) {
-                        pad.addEventListener('mousedown', startFlash);
-                        pad.addEventListener('touchstart', startFlash, {passive: false});
-                        
-                        pad.addEventListener('mouseup', stopFlash);
-                        pad.addEventListener('mouseleave', stopFlash);
-                        pad.addEventListener('touchend', stopFlash);
-                        pad.addEventListener('touchcancel', stopFlash);
-                    } else {
-                        pad.addEventListener('touchstart', (e) => {
-                            e.preventDefault(); 
-                            action.act();
-                        });
-                        pad.onclick = action.act;
-                    }
+                    pad.innerText = action.text;
+                    pad.addEventListener('touchstart', (e) => {
+                        e.preventDefault(); 
+                        action.act();
+                    });
+                    pad.onclick = action.act;
                 } else {
                     const symbols = ["+", "-", "·", "::", "||", "x", ""];
                     pad.innerText = symbols[Math.floor(Math.random() * symbols.length)];
@@ -759,16 +538,23 @@
         }
 
         function initArt() {
+            // Generate Rings
             for (let i = 0; i < MAX_RINGS; i++) {
                 const ring = document.createElement('div');
                 ring.className = 'ring';
-                ring.style.background = (i % 2 === 0) 
-                    ? 'linear-gradient(45deg, var(--grad-1), var(--grad-2))'
-                    : 'linear-gradient(-45deg, var(--grad-2), var(--grad-1))';
+                
+                // Alternate gradient angles for depth distinction
+                if (i % 2 === 0) {
+                    ring.style.background = 'linear-gradient(45deg, var(--grad-1), var(--grad-2))';
+                } else {
+                    ring.style.background = 'linear-gradient(-45deg, var(--grad-2), var(--grad-1))';
+                }
+
                 ringsContainer.appendChild(ring);
                 RINGS.push(ring);
             }
 
+            // Generate Shards
             for (let i = 0; i < NUM_SHARDS; i++) {
                 const shard = document.createElement('div');
                 shard.className = 'shard';
@@ -779,6 +565,7 @@
                 
                 shard.style.width = `${w}px`;
                 shard.style.height = `${h}px`;
+                
                 shard.dataset.angle = Math.random() * Math.PI * 2;
                 shard.dataset.dist = Math.random() * 20 + 5; 
                 shard.dataset.rot = Math.random() * 360;
@@ -796,60 +583,38 @@
             const sY = artState.stretchY;
 
             const thicknessScale = (val === 100 ? 12 : (2 + norm * 5)) / 2;
-            let chV_scale = `scale(${thicknessScale}, ${norm * 0.75 * sY})`;
-            let chH_scale = `scale(${norm * 0.75 * sX}, ${thicknessScale})`;
-            let coreSizeScale = (((norm * 12) + (norm > 0.85 ? Math.random() * 4 : 0)) / 10) * ((sX+sY)/2);
-            let core_scale = `scale(${coreSizeScale})`;
             
-            let rig_transform = `translate(-50%, -50%) rotate(0deg)`;
-            if (norm > 0.5) {
-                const rot = (norm - 0.5) * 45 * artState.rotSpeed; 
-                const jitterX = (Math.random() - 0.5) * (norm - 0.5) * 20;
-                const jitterY = (Math.random() - 0.5) * (norm - 0.5) * 20;
-                rig_transform = `translate(calc(-50% + ${jitterX}px), calc(-50% + ${jitterY}px)) rotate(${rot}deg)`;
-            }
+            chV.style.transform = `scale(${thicknessScale}, ${norm * 0.75 * sY})`;
+            chH.style.transform = `scale(${norm * 0.75 * sX}, ${thicknessScale})`;
 
-            if (isFlashing) {
-                const rx = (Math.random() - 0.5) * 50;
-                const ry = (Math.random() - 0.5) * 50;
-                rig_transform = `translate(calc(-50% + ${rx}vw), calc(-50% + ${ry}vh)) rotate(${Math.random() * 360}deg) scale(${Math.random() * 1.5 + 0.5})`;
-                
-                voidSpace.style.backgroundColor = Math.random() > 0.3 ? '#fff' : '#000';
-                voidSpace.style.filter = Math.random() > 0.5 ? 'invert(1)' : 'none';
-                strobe.style.opacity = Math.random() > 0.5 ? 1 : 0;
-            } else if (norm > 0.88) {
-                const flicker = Math.random() > 0.4 ? (norm - 0.8) * 5 : 0;
-                strobe.style.opacity = flicker;
-                voidSpace.style.backgroundColor = Math.random() > 0.85 ? '#0c0c0c' : '#000';
-            } else {
-                strobe.style.opacity = 0;
-                voidSpace.style.backgroundColor = '#000';
-            }
-
-            chV.style.transform = chV_scale;
-            chH.style.transform = chH_scale;
-            coreDot.style.transform = core_scale;
-            coreDot.style.opacity = norm > 0.15 || isFlashing ? 1 : 0;
-            artRig.style.transform = rig_transform;
-
+            // Dynamic Concentric Rings logic
             RINGS.forEach((ring, i) => {
                 if (i < artState.numRings) {
                     const sizeFactor = 0.85 - (i * 0.18); 
-                    const rScale = isFlashing ? Math.random() * 2 : (norm * sizeFactor);
-                    ring.style.transform = `scale(${rScale * sX}, ${rScale * sY})`;
-                    ring.style.opacity = norm > 0.05 || isFlashing ? Math.min(1, norm * 2.5) : 0;
+                    ring.style.transform = `scale(${norm * sizeFactor * sX}, ${norm * sizeFactor * sY})`;
+                    ring.style.opacity = norm > 0.05 ? Math.min(1, norm * 2.5) : 0;
                 } else {
                     ring.style.transform = `scale(0)`;
                     ring.style.opacity = 0;
                 }
             });
 
+            const coreSizeScale = (((norm * 12) + (norm > 0.85 ? Math.random() * 4 : 0)) / 10) * ((sX+sY)/2);
+            coreDot.style.transform = `scale(${coreSizeScale})`;
+            coreDot.style.opacity = norm > 0.15 ? 1 : 0;
+
+            if (norm > 0.5) {
+                const rot = (norm - 0.5) * 45 * artState.rotSpeed; 
+                const jitterX = (Math.random() - 0.5) * (norm - 0.5) * 20;
+                const jitterY = (Math.random() - 0.5) * (norm - 0.5) * 20;
+                artRig.style.transform = `translate(calc(-50% + ${jitterX}px), calc(-50% + ${jitterY}px)) rotate(${rot}deg)`;
+            } else {
+                artRig.style.transform = `translate(-50%, -50%) rotate(0deg)`;
+            }
+
             const activeThreshold = Math.floor(norm * NUM_SHARDS);
             SHARDS.forEach((shard, i) => {
-                if (isFlashing) {
-                    shard.style.opacity = Math.random();
-                    shard.style.transform = `translate(${(Math.random()-0.5)*120}vw, ${(Math.random()-0.5)*120}vh) rotate(${Math.random()*360}deg) scale(${Math.random()*3})`;
-                } else if (i < activeThreshold) {
+                if (i < activeThreshold) {
                     shard.style.opacity = (Math.random() * 0.5 + 0.1) * norm;
                     const bX = 1 + (artState.shardBiasX * norm);
                     const bY = 1 + (artState.shardBiasY * norm);
@@ -864,10 +629,19 @@
                     shard.style.transform = `translate(0,0) scale(0)`;
                 }
             });
+
+            if (norm > 0.88) {
+                const flicker = Math.random() > 0.4 ? (norm - 0.8) * 5 : 0;
+                strobe.style.opacity = flicker;
+                document.getElementById('voidSpace').style.backgroundColor = Math.random() > 0.85 ? '#0c0c0c' : '#000';
+            } else {
+                strobe.style.opacity = 0;
+                document.getElementById('voidSpace').style.backgroundColor = '#000';
+            }
         }
 
         function scheduleUpdate() {
-            if (!isUpdating && !isFlashing) {
+            if (!isUpdating) {
                 isUpdating = true;
                 requestAnimationFrame(() => {
                     updateArtPhysics();
@@ -877,7 +651,9 @@
         }
 
         function clearAffordance() {
+            // As soon as the user touches the fader, kill transitions to guarantee 0 latency dragging
             killTransitions(); 
+            
             if (fader.classList.contains('glow-active')) {
                 fader.classList.remove('glow-active');
                 arrowIndicator.classList.remove('show-indicator');
@@ -900,13 +676,14 @@
         scheduleUpdate();
 
         let touchStartY = 0;
+        const voidArea = document.getElementById('voidSpace');
         
-        voidSpace.addEventListener('touchstart', e => {
+        voidArea.addEventListener('touchstart', e => {
             touchStartY = e.touches[0].clientY;
             clearAffordance();
         }, {passive: true});
 
-        voidSpace.addEventListener('touchmove', e => {
+        voidArea.addEventListener('touchmove', e => {
             let touchEndY = e.touches[0].clientY;
             let diff = touchStartY - touchEndY;
             

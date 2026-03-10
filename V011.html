@@ -91,15 +91,16 @@
         }
 
         header img.icon {
-            height: 75px;
-            width: auto;
+            width: 65px;
+            height: auto;
             filter: contrast(200%) grayscale(100%);
         }
 
         header img.wordmark {
-            height: 75px;
+            height: 28px;
             width: auto;
             filter: contrast(200%) grayscale(100%);
+            margin-top: 4px; /* Optical alignment */
         }
 
         /* --- FULLSCREEN VOID CANVAS --- */
@@ -249,79 +250,6 @@
         }
         .imprint-modal .close-btn:hover { opacity: 1; }
 
-        /* --- LOGIN OVERLAY --- */
-        .login-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.4s ease;
-        }
-        .login-overlay.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .login-panel {
-            background: var(--panel);
-            border: 1px solid var(--panel-border);
-            padding: 40px;
-            border-radius: 8px;
-            text-align: center;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.9);
-            position: relative;
-            transform: translateY(20px) scale(0.95);
-            transition: transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
-        }
-        .login-overlay.show .login-panel {
-            transform: translateY(0) scale(1);
-        }
-        .login-close {
-            position: absolute;
-            top: 15px; right: 15px;
-            background: none; border: none;
-            color: #fff; font-size: 1.5rem;
-            cursor: pointer; opacity: 0.5;
-        }
-        .login-close:hover { opacity: 1; }
-        .login-logo {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 25px;
-            gap: 15px;
-        }
-        .login-logo img.icon { height: 60px; width: auto; }
-        .login-logo img.wordmark { height: 60px; width: auto; }
-        
-        .login-form {
-            display: flex; flex-direction: column; gap: 15px;
-        }
-        .login-form input {
-            background: #000; border: 1px solid #333; color: #fff;
-            padding: 14px; border-radius: 4px; font-family: monospace;
-            outline: none; text-align: center; font-size: 1rem;
-        }
-        .login-form input:focus { border-color: #777; }
-        .login-form button {
-            background: var(--fg); color: var(--bg); border: none;
-            padding: 14px; font-weight: bold; font-family: monospace;
-            cursor: pointer; border-radius: 4px; text-transform: uppercase;
-            font-size: 1rem; transition: background 0.2s, box-shadow 0.2s;
-        }
-        .login-form button:hover { 
-            background: #fff; 
-            box-shadow: 0 0 15px rgba(255,255,255,0.4); 
-        }
-
         /* --- FLOATING CONTROL PANEL --- */
         .device-panel {
             position: absolute;
@@ -392,21 +320,14 @@
             transition: all 0s;
         }
 
-        /* PROMINENT INVERTED BUTTONS (SHUFFLE & FLASH) */
-        .prominent-btn {
+        /* INVERTED SHUFFLE BUTTON */
+        .shuffle-inverted {
             background: var(--fg) !important;
             color: var(--bg) !important;
             border-color: #fff !important;
             animation: invertPulse 2.5s infinite alternate ease-in-out;
             text-shadow: none;
             box-shadow: inset 0 0 0 rgba(0,0,0,0) !important;
-        }
-
-        .prominent-btn:active {
-            transform: scale(0.95);
-            animation: none !important;
-            background: #aaa !important;
-            box-shadow: 0 0 30px var(--glow-color) !important;
         }
 
         @keyframes invertPulse {
@@ -505,15 +426,13 @@
         }
 
         @media (max-width: 600px) {
-            header { top: 1.5rem; left: 1.5rem; gap: 10px; }
-            header img.icon { height: 45px; }
-            header img.wordmark { height: 45px; }
+            header img.icon { width: 45px; }
+            header img.wordmark { height: 20px; margin-top: 2px; }
             .device-panel { bottom: 25px; padding: 16px; gap: 12px; }
             .fader-module { width: 75px; }
             .pad { min-height: 50px; font-size: 10px; }
             .fader-indicator { right: 4px; width: 20px; height: 20px; top: 15%; }
             .imprint-modal { max-height: 60vh; font-size: 0.75rem; padding: 16px; bottom: calc(100% + 15px); }
-            .login-logo img.icon, .login-logo img.wordmark { height: 45px; }
         }
     </style>
 </head>
@@ -537,20 +456,6 @@
         </div>
 
         <div class="shard-container" id="shardField"></div>
-    </div>
-
-    <div class="login-overlay" id="loginOverlay">
-        <div class="login-panel">
-            <button class="login-close" onclick="toggleLogin()">✕</button>
-            <div class="login-logo">
-                <img src="AZEFF_Icon-White.png" alt="AZEFF" class="icon">
-                <img src="AZEFF_Wordmark-White.png" alt="AZEFF" class="wordmark">
-            </div>
-            <form class="login-form" onsubmit="event.preventDefault(); alert('Authentication processing...');">
-                <input placeholder="Enter password" type="password" required>
-                <button type="submit">Enter</button>
-            </form>
-        </div>
     </div>
 
     <div class="device-panel" id="devicePanel">
@@ -588,7 +493,6 @@
 
         const imprintModal = document.getElementById('imprintModal');
         const imprintContent = document.getElementById('imprintContent');
-        const loginOverlay = document.getElementById('loginOverlay');
 
         const NUM_SHARDS = 45;
         const SHARDS = [];
@@ -614,6 +518,7 @@
         }
         window.addEventListener('resize', resizeFader);
 
+        // IMPRINT LOGIC
         let imprintLoaded = false;
         async function toggleImprint() {
             imprintModal.classList.toggle('show');
@@ -624,25 +529,16 @@
                         const text = await response.text();
                         imprintContent.innerHTML = text;
                     } else {
-                        imprintContent.innerHTML = '<p>Error loading imprint content. Ensure imprint.html exists.</p>';
+                        imprintContent.innerHTML = '<p>Error loading imprint content. Ensure imprint.html exists in the same directory.</p>';
                     }
                 } catch (error) {
-                    imprintContent.innerHTML = '<p>Could not load imprint.html due to local cross-origin restrictions. Please run via a local server.</p>';
+                    imprintContent.innerHTML = '<p>Could not load imprint.html due to local cross-origin restrictions. Please run via a local server (e.g., VS Code Live Server).</p>';
                 }
                 imprintLoaded = true;
             }
         }
 
-        function toggleLogin() {
-            loginOverlay.classList.toggle('show');
-            if(loginOverlay.classList.contains('show')) {
-                setTimeout(() => {
-                    const passInput = loginOverlay.querySelector('input[type="password"]');
-                    if(passInput) passInput.focus();
-                }, 100);
-            }
-        }
-
+        // FLASH LOGIC
         function startFlash(e) {
             if(e) e.preventDefault();
             if(isFlashing) return;
@@ -653,18 +549,20 @@
         function stopFlash(e) {
             if(e) e.preventDefault();
             isFlashing = false;
+            // Reset extreme overrides
             voidSpace.style.backgroundColor = '#000';
             voidSpace.style.filter = 'none';
             strobe.style.opacity = 0;
-            scheduleUpdate(); 
+            scheduleUpdate(); // Recalculate normal state
         }
 
         function flashLoop() {
             if(!isFlashing) return;
-            updateArtPhysics(); 
+            updateArtPhysics(); // Calculates normal, then applies overrides
             requestAnimationFrame(flashLoop);
         }
 
+        // SHUFFLE LOGIC
         function applyTemporaryTransition() {
             const elements = document.querySelectorAll('.ch-h, .ch-v, .ring, .core-dot, .shard, .art-rig');
             elements.forEach(el => {
@@ -683,9 +581,9 @@
         }
 
         function triggerShuffle() {
-            const shuffleBtn = document.getElementById('btn-shuffle');
+            const shuffleBtn = document.querySelector('.shuffle-inverted');
             if(shuffleBtn) {
-                shuffleBtn.classList.remove('prominent-btn');
+                shuffleBtn.classList.remove('shuffle-inverted');
                 void shuffleBtn.offsetWidth; 
             }
 
@@ -716,11 +614,12 @@
         function initDevice() {
             const NUM_PADS = 8; 
             
+            // Map buttons. 0: Shuffle, 5: Login, 6: Imprint, 7: Flash
             const actions = {
-                0: { id: "btn-shuffle", text: "SHUFFLE", act: triggerShuffle, extraClass: "prominent-btn" },
-                1: { id: "btn-flash", text: "FLASH", extraClass: "prominent-btn", isHold: true },
+                0: { text: "SHUFFLE", act: triggerShuffle, extraClass: "shuffle-inverted" },
+                5: { text: "LOG IN", act: () => alert("AUTH_SEQ_INIT") },
                 6: { text: "IMPRINT", act: toggleImprint },
-                7: { text: "LOG IN", act: toggleLogin }
+                7: { text: "FLASH", extraClass: "flash-btn", isHold: true }
             };
 
             for(let i = 0; i < NUM_PADS; i++) {
@@ -730,11 +629,11 @@
                 if (actions[i]) {
                     const action = actions[i];
                     pad.classList.add('active');
-                    if(action.id) pad.id = action.id;
-                    if(action.extraClass) pad.classList.add(...action.extraClass.split(" "));
+                    if(action.extraClass) pad.classList.add(action.extraClass);
                     pad.innerText = action.text;
                     
                     if (action.isHold) {
+                        // Flash Button Hold Logic
                         pad.addEventListener('mousedown', startFlash);
                         pad.addEventListener('touchstart', startFlash, {passive: false});
                         
@@ -743,6 +642,7 @@
                         pad.addEventListener('touchend', stopFlash);
                         pad.addEventListener('touchcancel', stopFlash);
                     } else {
+                        // Standard Click/Tap Logic
                         pad.addEventListener('touchstart', (e) => {
                             e.preventDefault(); 
                             action.act();
@@ -795,6 +695,7 @@
             const sX = artState.stretchX;
             const sY = artState.stretchY;
 
+            // Base Calculations
             const thicknessScale = (val === 100 ? 12 : (2 + norm * 5)) / 2;
             let chV_scale = `scale(${thicknessScale}, ${norm * 0.75 * sY})`;
             let chH_scale = `scale(${norm * 0.75 * sX}, ${thicknessScale})`;
@@ -809,6 +710,7 @@
                 rig_transform = `translate(calc(-50% + ${jitterX}px), calc(-50% + ${jitterY}px)) rotate(${rot}deg)`;
             }
 
+            // Apply FLASH Chaos Overrides
             if (isFlashing) {
                 const rx = (Math.random() - 0.5) * 50;
                 const ry = (Math.random() - 0.5) * 50;
@@ -826,12 +728,14 @@
                 voidSpace.style.backgroundColor = '#000';
             }
 
+            // Apply Transforms
             chV.style.transform = chV_scale;
             chH.style.transform = chH_scale;
             coreDot.style.transform = core_scale;
             coreDot.style.opacity = norm > 0.15 || isFlashing ? 1 : 0;
             artRig.style.transform = rig_transform;
 
+            // Rings Update
             RINGS.forEach((ring, i) => {
                 if (i < artState.numRings) {
                     const sizeFactor = 0.85 - (i * 0.18); 
@@ -844,6 +748,7 @@
                 }
             });
 
+            // Shards Update
             const activeThreshold = Math.floor(norm * NUM_SHARDS);
             SHARDS.forEach((shard, i) => {
                 if (isFlashing) {
