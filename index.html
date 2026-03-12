@@ -37,7 +37,7 @@
             height: 100dvh;
             background-color: var(--bg);
             color: var(--fg);
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Helvetica Neue', Arial, sans-serif; /* Single font-family for the entire site */
             overflow: hidden;
             touch-action: none;
         }
@@ -81,23 +81,24 @@
         /* HEADER & LOGOS */
         header {
             position: absolute;
-            top: 2rem;
-            left: 2rem;
+            top: 2.5rem;
+            left: 2.5rem;
             z-index: 100;
             mix-blend-mode: difference;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
         }
 
+        /* Adjusted heights to match visually */
         header img.icon {
-            height: 75px;
+            height: 90px;
             width: auto;
             filter: contrast(200%) grayscale(100%);
         }
 
         header img.wordmark {
-            height: 75px;
+            height: 90px;
             width: auto;
             filter: contrast(200%) grayscale(100%);
         }
@@ -211,9 +212,9 @@
             -webkit-backdrop-filter: blur(15px);
             border: 1px solid var(--panel-border);
             border-radius: 8px;
-            padding: 24px;
-            color: #b0b0b0;
-            font-size: 0.85rem;
+            padding: 30px;
+            color: #cccccc;
+            font-size: 0.9rem;
             line-height: 1.6;
             overflow-y: auto;
             z-index: 90;
@@ -223,6 +224,8 @@
             transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
             box-shadow: 0 30px 60px rgba(0,0,0,0.9);
             text-align: left;
+            /* Ensuring strict single font-family rule */
+            font-family: 'Helvetica Neue', Arial, sans-serif;
         }
 
         .imprint-modal.show {
@@ -231,21 +234,33 @@
             transform: translateY(0);
         }
 
-        .imprint-modal h1, .imprint-modal h2 {
-            color: var(--fg);
-            margin-bottom: 1rem;
-            font-family: monospace;
-            text-transform: uppercase;
+        /* Formatting the fetched imprint content */
+        .imprint-modal h1, 
+        .imprint-modal h2, 
+        .imprint-modal h3, 
+        .imprint-modal h4 {
+            color: #ffffff;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase; /* Forcing ALLCAPS */
+            letter-spacing: 1px;
         }
 
-        .imprint-modal p { margin-bottom: 1rem; }
+        .imprint-modal h2 { font-size: 1.4rem; }
+        .imprint-modal h3 { font-size: 1.1rem; color: #eeeeee; }
+
+        .imprint-modal p { 
+            margin-bottom: 1.2rem; 
+        }
         
         .imprint-modal .close-btn {
             position: absolute;
-            top: 15px; right: 15px;
+            top: 15px; right: 20px;
             background: none; border: none;
-            color: #fff; font-size: 1.5rem;
+            color: #fff; font-size: 1.8rem;
             cursor: pointer; opacity: 0.5;
+            padding: 0;
         }
         .imprint-modal .close-btn:hover { opacity: 1; }
 
@@ -253,7 +268,7 @@
         .login-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             display: flex;
@@ -276,7 +291,7 @@
             text-align: center;
             width: 90%;
             max-width: 400px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.9);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.95);
             position: relative;
             transform: translateY(20px) scale(0.95);
             transition: transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
@@ -286,17 +301,18 @@
         }
         .login-close {
             position: absolute;
-            top: 15px; right: 15px;
+            top: 15px; right: 20px;
             background: none; border: none;
-            color: #fff; font-size: 1.5rem;
+            color: #fff; font-size: 1.8rem;
             cursor: pointer; opacity: 0.5;
+            padding: 0;
         }
         .login-close:hover { opacity: 1; }
         .login-logo {
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
             gap: 15px;
         }
         .login-logo img.icon { height: 60px; width: auto; }
@@ -306,20 +322,21 @@
             display: flex; flex-direction: column; gap: 15px;
         }
         .login-form input {
-            background: #000; border: 1px solid #333; color: #fff;
-            padding: 14px; border-radius: 4px; font-family: monospace;
+            background: #050505; border: 1px solid #333; color: #fff;
+            padding: 16px; border-radius: 4px; font-family: 'Helvetica Neue', Arial, sans-serif;
             outline: none; text-align: center; font-size: 1rem;
         }
         .login-form input:focus { border-color: #777; }
         .login-form button {
             background: var(--fg); color: var(--bg); border: none;
-            padding: 14px; font-weight: bold; font-family: monospace;
+            padding: 16px; font-weight: bold; font-family: 'Helvetica Neue', Arial, sans-serif;
             cursor: pointer; border-radius: 4px; text-transform: uppercase;
             font-size: 1rem; transition: background 0.2s, box-shadow 0.2s;
+            letter-spacing: 1px;
         }
         .login-form button:hover { 
             background: #fff; 
-            box-shadow: 0 0 15px rgba(255,255,255,0.4); 
+            box-shadow: 0 0 20px rgba(255,255,255,0.3); 
         }
 
         /* --- FLOATING CONTROL PANEL --- */
@@ -361,7 +378,7 @@
             color: #222;
             font-size: clamp(9px, 2.2vw, 12px);
             font-weight: bold;
-            font-family: monospace;
+            font-family: 'Helvetica Neue', Arial, sans-serif; /* Matched to single font rule */
             text-transform: uppercase;
             letter-spacing: 0.5px;
             display: flex; justify-content: center; align-items: center;
@@ -505,14 +522,14 @@
         }
 
         @media (max-width: 600px) {
-            header { top: 1.5rem; left: 1.5rem; gap: 10px; }
-            header img.icon { height: 45px; }
-            header img.wordmark { height: 45px; }
+            header { top: 1.5rem; left: 1.5rem; gap: 12px; }
+            header img.icon { height: 55px; }
+            header img.wordmark { height: 55px; }
             .device-panel { bottom: 25px; padding: 16px; gap: 12px; }
             .fader-module { width: 75px; }
             .pad { min-height: 50px; font-size: 10px; }
             .fader-indicator { right: 4px; width: 20px; height: 20px; top: 15%; }
-            .imprint-modal { max-height: 60vh; font-size: 0.75rem; padding: 16px; bottom: calc(100% + 15px); }
+            .imprint-modal { max-height: 60vh; font-size: 0.8rem; padding: 20px; bottom: calc(100% + 15px); }
             .login-logo img.icon, .login-logo img.wordmark { height: 45px; }
         }
     </style>
@@ -541,7 +558,7 @@
 
     <div class="login-overlay" id="loginOverlay">
         <div class="login-panel">
-            <button class="login-close" onclick="toggleLogin()">✕</button>
+            <button class="login-close" onclick="toggleLogin()">×</button>
             <div class="login-logo">
                 <img src="AZEFF_Icon-White.png" alt="AZEFF" class="icon">
                 <img src="AZEFF_Wordmark-White.png" alt="AZEFF" class="wordmark">
@@ -614,6 +631,7 @@
         }
         window.addEventListener('resize', resizeFader);
 
+        // UI OVERLAYS (IMPRINT & LOGIN)
         let imprintLoaded = false;
         async function toggleImprint() {
             imprintModal.classList.toggle('show');
@@ -643,6 +661,7 @@
             }
         }
 
+        // FLASH LOGIC
         function startFlash(e) {
             if(e) e.preventDefault();
             if(isFlashing) return;
@@ -665,6 +684,7 @@
             requestAnimationFrame(flashLoop);
         }
 
+        // SHUFFLE LOGIC
         function applyTemporaryTransition() {
             const elements = document.querySelectorAll('.ch-h, .ch-v, .ring, .core-dot, .shard, .art-rig');
             elements.forEach(el => {
